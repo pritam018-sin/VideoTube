@@ -6,18 +6,18 @@ import { ApiResponse } from '../utils/apiResponse.js';
 
 const registerUser = asyncHandler(async (req, res) => {
     //get User Detail From Frontend
-    const {fullName, email, username, password}= req.body;
+    const {fullname, email, username, password}= req.body;
 
     //validate User Input
 
     if(
-        [fullName, email, username, password].some((field) => field?.trim() === "")
+        [fullname, email, username, password].some((field) => field?.trim() === "")
     ) {
         throw new ApiError(400, "All fields are required");
     }
 
     //check if user allready Exist
-   const existedUser =  User.findOne({
+   const existedUser = await User.findOne({
         $or: [
             {email},
             {username}
@@ -45,7 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     //create User Object - create entry in db
    const user = await User.create({
-        fullName,
+        fullname,
         avatar: avatar.url,
         coverImage: coverImage?.url || "",
         email,
