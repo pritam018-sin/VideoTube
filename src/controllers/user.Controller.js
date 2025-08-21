@@ -91,7 +91,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const {email, username, password} = req.body;
 
     //Username and email
-    if(!(username || +email)){
+    if(!(username || email)){
         throw new ApiError(400, "username or email is required")
     }
 
@@ -273,7 +273,8 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
-    const avatarLocalPath = req.files?.path;
+    // Multer single file => req.file
+    const avatarLocalPath = req.file?.path;
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required");
@@ -286,14 +287,10 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Avatar upload failed");
     }
 
-    // Update user avatar
+    // Update user avatar in DB
     const user = await User.findByIdAndUpdate(
         req.user?._id,
-        { 
-           $set: {
-               avatar: avatar.url
-           }
-        },
+        { $set: { avatar: avatar.url } },
         { new: true }
     ).select("-password");
 
@@ -302,8 +299,9 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     );
 });
 
+
 const updateUserCoverImage = asyncHandler(async (req, res) => {
-    const coverImageLocalPath = req.files?.path;
+    const coverImageLocalPath = req.file?.path;
 
     if (!coverImageLocalPath) {
         throw new ApiError(400, "Cover image file is required");
@@ -326,6 +324,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         },
         { new: true }
     ).select("-password");
+    
 
     return res.status(200).json(
         new ApiResponse(200, user, "Cover image updated successfully")
