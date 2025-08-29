@@ -1,6 +1,7 @@
 import {asyncHandler} from '../utils/asyncHandler.js';
 import ApiError from '../utils/apiError.js';
 import { Video } from '../models/video.Model.js';
+import { Comment } from '../models/comment.Model.js';
 import { cloudinaryUpload } from '../utils/cloudnaryService.js';
 import { ApiResponse } from '../utils/apiResponse.js';
 import jwt from 'jsonwebtoken';
@@ -44,6 +45,246 @@ const uploadContent = asyncHandler(async (req, res) => {
     );
 });
 
+const updateVideo = asyncHandler(async (req, res) => {
+    const { title, description, isPublished } = req.body;
+
+    if ([title, description].some(field => !field || field.trim() === "")) {
+        throw new ApiError(400, "All fields are required");
+    }
+
+    const updatedVideo = await Video.findByIdAndUpdate(
+        req.params.id,
+        {
+            $set: {
+                title: title.trim(),
+                description: description.trim(),
+                isPublished: isPublished ?? false,
+            },
+        },
+        { new: true, runValidators: true }  // new:true -> updated doc return karega
+    );
+
+    if (!updatedVideo) {
+        throw new ApiError(404, "Video not found");
+    }
+
+    res.status(200).json(
+        new ApiResponse(200, "Video updated successfully", updatedVideo)
+    );
+});
+const updateVideoThumbnail = asyncHandler(async (req, res) => {
+    // Multer single file => req.file
+    const thumbnailLocalPath = req.file?.path;
+
+    if (!thumbnailLocalPath) {
+        throw new ApiError(400, "Thumbnail file is required");
+    }
+
+    // Upload to Cloudinary
+    const thumbnail = await cloudinaryUpload(thumbnailLocalPath);
+
+    if (!thumbnail) {
+        throw new ApiError(400, "Thumbnail upload failed");
+    }
+
+    // Update video thumbnail in DB
+    const video = await Video.findByIdAndUpdate(
+        req.params.id, // video id from URL
+        { $set: { thumbnail: thumbnail.url } },
+        { new: true }
+    );
+
+    if (!video) {
+        throw new ApiError(404, "Video not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, video, "Thumbnail updated successfully")
+    );
+});
+
+const togglePublish = asyncHandler(async (req, res) => {
+    const videoId = req.params.id; // tumne routes me :id use kiya tha
+
+    // Find video
+    const video = await Video.findById(videoId);
+    if (!video) {
+        throw new ApiError(404, "Video not found");
+    }
+
+    // Toggle publish status
+    const updatedVideo = await Video.findByIdAndUpdate(
+        videoId,
+        { $set: { isPublished: !video.isPublished } },
+        { new: true }
+    );
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedVideo, "Publish status updated successfully")
+    );
+});
+
+const deleteVideo = asyncHandler(async (req, res) => {
+    const videoId = req.params.id;
+
+    // Find video
+    const video = await Video.findById(videoId);
+    if (!video) {
+        throw new ApiError(404, "Video not found");
+    }
+
+    // Check ownership
+    if (video.owner.toString() !== req.user?._id.toString()) {
+        throw new ApiError(403, "You are not allowed to delete this video");
+    }
+
+    // Delete video
+    await Video.findByIdAndDelete(videoId);
+
+    return res.status(200).json(
+        new ApiResponse(200, null, "Video deleted successfully")
+    );
+});
+
+const getAllVideos = asyncHandler(async (req, res) => {
+    const videos = await Video.find({ isPublished: true }).populate('owner', 'username avatar');
+
+    if (!videos || videos.length === 0) {
+        return res.status(404).json(
+            new ApiResponse(404, null, "No videos found")
+        );
+    }
+    res.status(200).json(
+        new ApiResponse(200, videos, "All videos fetched successfully")
+    );
+});
+
+const getVideoById = asyncHandler(async (req, res) => {
+    const videoId = req.params.id;
+    const video  = await Video.findById(videoId)
+        .populate('owner', 'username avatar')
+        .populate({
+            path: 'comments',
+            populate: { path: 'owner', select: 'username avatar' }
+        })
+        .populate('likes', 'username avatar');
+
+   if (!video) {
+       return res.status(404).json(
+           new ApiResponse(404, null, "Video not found")
+       );
+   }
+
+   // auto-increase view count
+   video.views += 1;
+   await video.save();
+
+   res.status(200).json(
+       new ApiResponse(200, video, "Video fetched successfully")
+   );
+});
+
+const getUserVideos = asyncHandler(async (req, res) => {
+    const {id} = req.params;
+
+    const userVideos = await Video.find({owner: id, isPublished: true});
+
+   if (!userVideos || userVideos.length === 0) {
+       return res.status(404).json(
+           new ApiResponse(404, null, "No videos found for this user")
+       );
+   }
+
+   res.status(200).json(
+       new ApiResponse(200, userVideos, "User videos fetched successfully")
+   );
+});
+
+const toggleLikeVideo = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const video = await Video.findById(id);
+    if (!video) throw new ApiError(404, "Video not found");
+
+    const alreadyLiked = video.likes.includes(userId);
+
+    if (alreadyLiked) {
+        video.likes = video.likes.filter(uid => uid.toString() !== userId.toString());
+    } else {
+        video.likes.push(userId);
+    }
+
+    await video.save();
+
+    res.status(200).json(
+        new ApiResponse(200, { likesCount: video.likes.length, liked: !alreadyLiked }, "Like status updated")
+    );
+});
+
+const addComment = asyncHandler(async (req, res) => {
+    const { id } = req.params; // videoId
+    const { content } = req.body;
+
+    if (!content || content.trim() === "") {
+        throw new ApiError(400, "Comment cannot be empty");
+    }
+
+    const video = await Video.findById(id);
+    if (!video) throw new ApiError(404, "Video not found");
+
+    const comment = await Comment.create({
+        content: content.trim(),
+        video: id,
+        owner: req.user._id
+    });
+
+    video.comments.push(comment._id);
+    await video.save();
+
+    res.status(201).json(
+        new ApiResponse(201, comment, "Comment added successfully")
+    );
+});
+
+const deleteComment = asyncHandler(async (req, res) => {
+    const { id, commentId } = req.params;
+
+    const video = await Video.findById(id);
+    if (!video) throw new ApiError(404, "Video not found");
+
+    const comment = await Comment.findById(commentId);
+    if (!comment) throw new ApiError(404, "Comment not found");
+
+    // only comment owner or video owner can delete
+    if (
+        comment.owner.toString() !== req.user._id.toString() &&
+        video.owner.toString() !== req.user._id.toString()
+    ) {
+        throw new ApiError(403, "Not authorized to delete this comment");
+    }
+
+    await comment.deleteOne();
+
+    video.comments = video.comments.filter(
+        (c) => c.toString() !== commentId.toString()
+    );
+    await video.save();
+
+    res.status(200).json(
+        new ApiResponse(200, null, "Comment deleted successfully")
+    );
+});
 export {
     uploadContent,
+    updateVideo,
+    updateVideoThumbnail,
+    togglePublish,
+    toggleLikeVideo,
+    addComment,
+    deleteComment,
+    deleteVideo,
+    getAllVideos,
+    getVideoById,
+    getUserVideos
 }
