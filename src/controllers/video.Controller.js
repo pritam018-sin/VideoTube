@@ -10,9 +10,7 @@ const uploadContent = asyncHandler(async (req, res) => {
     const { title, description, isPublished} = req.body;
 
     // validation for required fields
-    if(
-        [title, description].some((field) => field?.trim() === "")
-    ) {
+    if ([title, description].some(field => !field || field.trim() === "")) {
         throw new ApiError(400, "All fields are required");
     }
 
@@ -38,7 +36,7 @@ const uploadContent = asyncHandler(async (req, res) => {
         description: description.trim(),
         duration: uploadedVideo.duration,   // ⚡ Cloudinary gives duration
         owner: req.user._id,
-        isPublished: isPublished 
+        isPublished: isPublished ?? false
     });
 
     res.status(201).json(
