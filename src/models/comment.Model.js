@@ -17,6 +17,12 @@ const commentSchema = new mongoose.Schema(
       ref: "Video",
       required: true,
     },
+    likes: [
+      { 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User" 
+      }
+    ]
   },
   { timestamps: true } // adds createdAt & updatedAt
 );

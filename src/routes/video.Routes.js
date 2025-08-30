@@ -2,8 +2,6 @@ import {Router} from 'express';
 import { verifyJWT } from '../middlewares/auth.Middleware.js';
 import { upload } from '../middlewares/mutler.Middleware.js';
 import { 
-    addComment,
-        deleteComment,
         deleteVideo,
         getAllVideos,
         getUserVideos,
@@ -14,7 +12,6 @@ import {
         updateVideoThumbnail,
         uploadContent
     } from '../controllers/video.Controller.js';
-import { get } from 'mongoose';
 const router = Router();
 
 // ✅ Upload video (with thumbnail)
@@ -58,14 +55,5 @@ router.route("/like/:id").post(
     toggleLikeVideo
 );
 
-router.route("/:id/comments").post(
-    verifyJWT,
-    addComment
-);
-
-router.route("/:id/comments/:commentId").delete(
-    verifyJWT,
-    deleteComment
-);
 
 export default router;
