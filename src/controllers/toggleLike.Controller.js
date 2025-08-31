@@ -1,32 +1,35 @@
-// controllers/toggleLike.Controller.js
+// controllers/like.controller.js
+import { Like } from "../models/like.Model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import {ApiResponse} from "../utils/apiResponse.js";
+import { ApiResponse } from "../utils/apiResponse.js";
 
-export const toggleLike = (resourceModel) => {
+export const toggleLike = (resourceType) => {
   return asyncHandler(async (req, res) => {
-    const { id } = req.params;      // Resource ID (Video / Comment / Post)
-    const userId = req.user._id;    // Logged-in user
+    const { id } = req.params;   // resource id (videoId/commentId/tweetId)
+    const userId = req.user._id;
 
-    const resource = await resourceModel.findById(id);
-    if (!resource) {
-      return res.status(404).json(new ApiResponse(404, null, "Resource not found"));
-    }
+    // Filter dynamically (video/comment/tweet)
+    const filter = { [resourceType]: id, likedBy: userId };
 
-    // Toggle logic
-    const index = resource.likes.indexOf(userId);
+    // Check if already liked
+    const existingLike = await Like.findOne(filter);
+
     let message;
-    if (index === -1) {
-      resource.likes.push(userId);
-      message = "Liked successfully";
-    } else {
-      resource.likes.splice(index, 1);
+    if (existingLike) {
+      // If already liked → unlike
+      await Like.findByIdAndDelete(existingLike._id);
       message = "Unliked successfully";
+    } else {
+      // New like
+      await Like.create({ [resourceType]: id, likedBy: userId });
+      message = "Liked successfully";
     }
 
-    await resource.save();
+    // Count updated likes
+    const likesCount = await Like.countDocuments({ [resourceType]: id });
 
     return res.status(200).json(
-      new ApiResponse(200, { likesCount: resource.likes.length }, message)
+      new ApiResponse(200, { likesCount }, message)
     );
   });
 };

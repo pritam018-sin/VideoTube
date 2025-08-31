@@ -6,12 +6,12 @@ import {
         getAllVideos,
         getUserVideos,
         getVideoById,
-        toggleLikeVideo,
         togglePublish, 
         updateVideo,
         updateVideoThumbnail,
         uploadContent
     } from '../controllers/video.Controller.js';
+import { toggleLike } from '../controllers/toggleLike.Controller.js';
 const router = Router();
 
 // ✅ Upload video (with thumbnail)
@@ -48,12 +48,13 @@ router.route("/delete-video/:id").delete(
 );
 router.route("/all-videos").get(getAllVideos);
 router.route("/:id").get(getVideoById);
+router.route("/:id/like").post(verifyJWT, toggleLike("video"));
 router.route("/user-videos/:id").get(getUserVideos);
 
-router.route("/like/:id").post(
-    verifyJWT,
-    toggleLikeVideo
-);
+// router.route("/like/:id").post(
+//     verifyJWT,
+//     toggleLikeVideo
+// );
 
 
 export default router;
