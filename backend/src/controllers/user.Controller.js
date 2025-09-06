@@ -59,7 +59,9 @@ const registerUser = asyncHandler(async (req, res) => {
    if(!avatar){
        throw new ApiError(400, "Avatar upload failed");
    }
-
+   if(!coverImage){
+       throw new ApiError(400, "Cover image upload failed");
+   }
     //create User Object - create entry in db
    const user = await User.create({
         fullname,
@@ -127,10 +129,11 @@ const loginUser = asyncHandler(async (req, res) => {
    .json(
         new ApiResponse(
             200,
+            "User logged In Successfully",
             {
                 user: loggedInUser, accessToken, refreshToken
             },
-            "User logged In Successfully"
+            // "User logged In Successfully"
         )
    )
 

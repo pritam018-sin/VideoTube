@@ -1,12 +1,22 @@
 import React from 'react'
+import { Outlet } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Sidebar from "./pages/Auth/Sidebar";
+import Navbar from "./pages/Auth/Navbar";
+
 
 const App = () => {
   return (
     <div>
-      <h1>Welcome to VideoTube</h1>
-      <p>Your one-stop solution for all video content.</p>
+      <ToastContainer />
+      <Sidebar />
+      <Navbar />
+      <main className="py-3">
+        <Outlet />
+      </main>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

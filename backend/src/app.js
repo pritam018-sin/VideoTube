@@ -11,7 +11,7 @@ app.use(cors({
 }));
 app.use(express.json({limit: '30kb'}));
 app.use(express.urlencoded({extended: true, limit: '30kb'}));
-app.use(express.static('public')); // Serve static files from the 'public' directory
+app.use(express.static("public"));// Serve static files from the 'public' directory
 app.use(cookieParser());
 
 //Routes
