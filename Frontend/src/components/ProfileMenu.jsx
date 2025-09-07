@@ -29,7 +29,7 @@ export default function ProfileMenu({ userInfo, onClose }) {
 
       <div className="flex flex-col py-2">
         <Link
-          to="/profile"
+          to={"/current-user"}
           onClick={onClose}
           className="px-4 py-2 text-sm text-gray-200 hover:bg-white/10 transition rounded-md"
         >

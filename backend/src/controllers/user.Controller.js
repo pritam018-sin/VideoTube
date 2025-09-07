@@ -1,5 +1,6 @@
 import {asyncHandler} from '../utils/asyncHandler.js';
 import ApiError from '../utils/apiError.js';
+import {Video} from "../models/video.Model.js";
 import {User} from '../models/user.Model.js';
 import { cloudinaryUpload } from '../utils/cloudnaryService.js';
 import { ApiResponse } from '../utils/apiResponse.js';
@@ -243,13 +244,62 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
         new ApiResponse(200, {}, "Password changed successfully")
     );
 });
-
 const getCurrentUser = asyncHandler(async (req, res) => {
-   
-    return res.status(200).json(
-        new ApiResponse(200,  req.user , "Current user fetched successfully")
-    );
+  const userId = new mongoose.Types.ObjectId(req.user._id);
+
+  // Aggregation pipeline
+  const userWithStats = await User.aggregate([
+    { $match: { _id: userId } },
+
+    // Lookup videos created by this user
+    {
+      $lookup: {
+        from: "videos",
+        localField: "_id",
+        foreignField: "owner",
+        as: "videos",
+      },
+    },
+
+    // Add fields for counts
+    {
+      $addFields: {
+        subscribersCount: { $size: { $ifNull: ["$subscribers", []] } },
+        subscribedToCount: { $size: { $ifNull: ["$subscribedTo", []] } },
+        videosCount: { $size: "$videos" },
+        totalLikes: {
+          $sum: {
+            $map: {
+              input: "$videos",
+              as: "video",
+              in: { $size: { $ifNull: ["$$video.likes", []] } },
+            },
+          },
+        },
+      },
+    },
+
+    // Limit fields to return (so password or sensitive data won't leak)
+    {
+      $project: {
+        fullname: 1,
+        username: 1,
+        email: 1,
+        avatar: 1,
+        coverImage: 1,
+        subscribersCount: 1,
+        subscribedToCount: 1,
+        videosCount: 1,
+        totalLikes: 1,
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Current user fetched successfully", userWithStats[0]));
 });
+
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
     const { fullname, email } = req.body;

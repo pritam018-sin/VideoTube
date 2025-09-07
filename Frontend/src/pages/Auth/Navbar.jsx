@@ -33,7 +33,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gray-900 text-white p-4 flex justify-between items-center relative">
+    <nav className="bg-gray-900 text-white p-4 flex justify-between items-center fixed top-0 left-0 right-0 z-50">
       <Link to="/" className="flex items-center space-x-3 ml-20">
         <img src={Logo} alt="Logo" className="h-10" />
         <div>
