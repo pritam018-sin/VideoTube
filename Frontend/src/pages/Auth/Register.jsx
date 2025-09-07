@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRegisterMutation } from "../../redux/api/userApiSlice";
+import {toast} from 'react-toastify';
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../redux/feature/auth/authSlice.js";
 
 const Register = () => {
   const navigate = useNavigate();
   const [register, { isLoading }] = useRegisterMutation();
+  const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
-    fullName: "",
+    fullname: "",
     username: "",
     email: "",
     password: "",
@@ -42,7 +46,7 @@ const Register = () => {
     }
 
     const data = new FormData();
-    data.append("fullName", formData.fullName);
+    data.append("fullname", formData.fullname);
     data.append("username", formData.username);
     data.append("email", formData.email);
     data.append("password", formData.password);
@@ -50,11 +54,13 @@ const Register = () => {
     if (formData.coverImage) data.append("coverImage", formData.coverImage);
 
     try {
-      await register(data).unwrap();
+      const res = await register(data).unwrap(); 
+      dispatch(setCredentials({ ...res }));
+      toast.success("Registered successfully");
       navigate("/login");
     } catch (err) {
       console.error("Register failed:", err);
-      alert(err?.data?.message || "Something went wrong!");
+      toast.error(err?.data?.message || err?.message || "Register failed");
     }
   };
 
@@ -69,9 +75,9 @@ const Register = () => {
         {/* Full Name */}
         <input
           type="text"
-          name="fullName"
+          name="fullname"
           placeholder="Full Name"
-          value={formData.fullName}
+          value={formData.fullname}
           onChange={handleChange}
           className="w-full p-2 rounded-lg bg-gray-700 text-white outline-none"
           required
