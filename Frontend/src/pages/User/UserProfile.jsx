@@ -2,11 +2,12 @@ import React from "react";
 import { useGetCurrentUserQuery } from "../../redux/api/userApiSlice";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { FiPenTool as Pencil } from "react-icons/fi"; 
 
 const UserProfile = () => {
   const { data, isLoading, error } = useGetCurrentUserQuery();
   const user = data?.data;
- console.log(user);
+
   if (isLoading)
     return <div className="text-center mt-20 text-gray-400">Loading...</div>;
   if (error)
@@ -16,7 +17,7 @@ const UserProfile = () => {
 
   return (
     <div className="bg-[#0f0f0f] min-h-screen text-white font-sans mt-15">
-      {/* Banner */}
+      {/* Banner / Cover */}
       <div className="relative w-full h-60 bg-gradient-to-r from-[#1a1a1a] to-[#111111] overflow-hidden">
         {user?.coverImage ? (
           <img
@@ -29,22 +30,42 @@ const UserProfile = () => {
         )}
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f0f] via-transparent to-transparent" />
+
+        {/* ✨ Edit Cover Button */}
+        <Link
+          to="/update-cover-image"
+          className="absolute bottom-3 right-3 -rotate-90 bg-black/50 hover:bg-black/70 p-2 rounded-full"
+        >
+          <Pencil size={18} className="text-white" />
+        </Link>
       </div>
 
       {/* Profile Section */}
       <div className="relative max-w-6xl mx-auto px-6">
         {/* Avatar */}
-        <motion.img
-          whileHover={{ scale: 1.1 }}
-          src={user?.avatar || "https://via.placeholder.com/150"}
-          alt="Avatar"
-          className="absolute -top-20 left-6 w-50 h-50 rounded-full border-4 border-[#0f0f0f] shadow-[0_0_20px_rgba(255,255,255,0.2)] object-cover"
-        />
+        <div className="absolute -top-20 left-6">
+          <motion.img
+            whileHover={{ scale: 1.1 }}
+            src={user?.avatar || "https://via.placeholder.com/150"}
+            alt="Avatar"
+            className="w-40 h-40 rounded-full border-4 border-[#0f0f0f] shadow-[0_0_20px_rgba(255,255,255,0.2)] object-cover"
+          />
+
+          {/* ✨ Edit Avatar Button */}
+          <Link
+            to="/update-avatar"
+            className="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 p-2 rounded-full"
+          >
+            <Pencil size={16} className="text-white -rotate-90" />
+          </Link>
+        </div>
 
         {/* User Info */}
         <div className="pt-30 pl-12 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-4xl font-bold tracking-wide">{user?.fullname}</h1>
+            <h1 className="text-4xl font-bold tracking-wide">
+              {user?.fullname}
+            </h1>
             <p className="text-red-400 text-lg mt-1">@{user?.username}</p>
             <p className="text-gray-300 mt-2">Email: {user?.email}</p>
           </div>
@@ -82,11 +103,15 @@ const UserProfile = () => {
         {/* Stats Section */}
         <div className="mt-8 flex gap-6 text-gray-300">
           <div className="flex flex-col items-center">
-            <span className="text-xl font-bold">{user?.subscribersCount || 0}</span>
+            <span className="text-xl font-bold">
+              {user?.subscribersCount || 0}
+            </span>
             <span className="text-gray-500">Subscribers</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="text-xl font-bold">{user?.subscribedToCount || 0}</span>
+            <span className="text-xl font-bold">
+              {user?.subscribedToCount || 0}
+            </span>
             <span className="text-gray-500">Subscribed To</span>
           </div>
           <div className="flex flex-col items-center">
@@ -97,7 +122,6 @@ const UserProfile = () => {
             <span className="text-xl font-bold">{user?.likesCount || 0}</span>
             <span className="text-gray-500">Likes</span>
           </div>
-          
         </div>
       </div>
     </div>

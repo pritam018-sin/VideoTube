@@ -15,6 +15,9 @@ import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/Auth/Login.jsx";
 import Register from "./pages/Auth/Register.jsx";
 import UserProfile from './pages/User/UserProfile.jsx';
+import UpdateProfile from './pages/User/UpdateProfile.jsx';
+import UpdateAvatar from './pages/User/UpdateAvatar.jsx';
+import UpdateCover from './pages/User/UpdateCover.jsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -24,6 +27,9 @@ const router = createBrowserRouter(
       {/* <Route index={true} path="/" element={<Home />} /> */}
       <Route element={<PrivateRoute />}>
         <Route path="current-user" element={<UserProfile />} />
+        <Route path="update-account-details" element={<UpdateProfile />} />
+        <Route path="update-avatar" element={<UpdateAvatar />} />
+        <Route path="update-cover-image" element={<UpdateCover />} />
         {/* <Route path="dashboard" element={<Dashboard />} /> */}
       </Route>
     </Route>

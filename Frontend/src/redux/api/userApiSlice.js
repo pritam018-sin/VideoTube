@@ -32,12 +32,40 @@ export const userApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["User"],
     }),
+    updateAccountDetails: builder.mutation({
+      query: (userData) => ({
+        url: `${USERS_URL}/update-account-details`,
+        method: "PATCH",
+        body: userData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    updateAvatar: builder.mutation({
+      query: (formData) => ({
+        url: `${USERS_URL}/update-avatar`,
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    updateCover: builder.mutation({
+      query: (formData) => ({
+        url: `${USERS_URL}/update-cover-image`,
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
+
 
 export const {
   useLoginMutation,
   useRegisterMutation,
   useLogoutMutation,
   useGetCurrentUserQuery,
+  useUpdateAccountDetailsMutation,
+  useUpdateAvatarMutation,  
+  useUpdateCoverMutation,
 } = userApiSlice;
