@@ -19,6 +19,7 @@ import UpdateProfile from './pages/User/UpdateProfile.jsx';
 import UpdateAvatar from './pages/User/UpdateAvatar.jsx';
 import UpdateCover from './pages/User/UpdateCover.jsx';
 import UserChannel from './pages/User/UserChannel.jsx';
+import WatchHistory from './pages/User/WatchHistory.jsx';
 
 
 const router = createBrowserRouter(
@@ -33,6 +34,7 @@ const router = createBrowserRouter(
         <Route path="update-avatar" element={<UpdateAvatar />} />
         <Route path="update-cover-image" element={<UpdateCover />} />
         <Route path="user-channel/:username" element={<UserChannel />} />
+        <Route path="watch-history" element={<WatchHistory />} />
         {/* <Route path="dashboard" element={<Dashboard />} /> */}
       </Route>
     </Route>

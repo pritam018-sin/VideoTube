@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { SiHomebridge, SiAirplayvideo } from "react-icons/si";
-import { FiSettings } from "react-icons/fi";
+import { FiSettings, } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { FaHistory } from "react-icons/fa";
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -63,6 +64,17 @@ const Sidebar = () => {
           {isExpanded && (
             <span className="nav-item-name transition-opacity duration-300">
               SETTINGS
+            </span>
+          )}
+        </Link>
+        <Link
+          to="/watch-history"
+          className="flex items-center gap-3 px-2 transition-transform transform hover:translate-x-2 hover:text-purple-300"
+        >
+          <FaHistory size={26} />
+          {isExpanded && (
+            <span className="nav-item-name transition-opacity duration-300">
+              WATCH HISTORY
             </span>
           )}
         </Link>

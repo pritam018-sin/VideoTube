@@ -62,6 +62,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["User"],
+    }),
+    watchHistory: builder.query({
+      query: () => ({
+        url: `${USERS_URL}/watch-history`,
+        method: "GET",
+      }),
+      providesTags: ["User"],
     })
   }),
 });
@@ -76,4 +83,5 @@ export const {
   useUpdateAvatarMutation,  
   useUpdateCoverMutation,
   useGetUserChannelProfileQuery,
+  useWatchHistoryQuery,
 } = userApiSlice;
