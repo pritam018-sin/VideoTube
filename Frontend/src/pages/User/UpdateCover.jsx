@@ -26,7 +26,7 @@ const UpdateCover = () => {
     if (!file) return toast.error("Please select a file!");
 
     const formData = new FormData();
-    formData.append("cover", file);
+    formData.append("coverImage", file);
 
     try {
       await updateCover(formData).unwrap();

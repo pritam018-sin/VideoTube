@@ -56,6 +56,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    getUserChannelProfile: builder.query({
+      query: (username) => ({
+        url: `${USERS_URL}/channel/${username}`,
+        method: "GET",
+      }),
+      providesTags: ["User"],
+    })
   }),
 });
 
@@ -68,4 +75,5 @@ export const {
   useUpdateAccountDetailsMutation,
   useUpdateAvatarMutation,  
   useUpdateCoverMutation,
+  useGetUserChannelProfileQuery,
 } = userApiSlice;

@@ -18,6 +18,8 @@ import UserProfile from './pages/User/UserProfile.jsx';
 import UpdateProfile from './pages/User/UpdateProfile.jsx';
 import UpdateAvatar from './pages/User/UpdateAvatar.jsx';
 import UpdateCover from './pages/User/UpdateCover.jsx';
+import UserChannel from './pages/User/UserChannel.jsx';
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -30,6 +32,7 @@ const router = createBrowserRouter(
         <Route path="update-account-details" element={<UpdateProfile />} />
         <Route path="update-avatar" element={<UpdateAvatar />} />
         <Route path="update-cover-image" element={<UpdateCover />} />
+        <Route path="user-channel/:username" element={<UserChannel />} />
         {/* <Route path="dashboard" element={<Dashboard />} /> */}
       </Route>
     </Route>
