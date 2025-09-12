@@ -20,6 +20,8 @@ const UserChannel = () => {
   if (error) return <div className="text-red-500 mt-20">Error loading channel data</div>;
 
   const channel = channelData?.data;
+  // console.log(channel);
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
@@ -90,9 +92,9 @@ const UserChannel = () => {
 
         {/* Tab Content */}
         <div className="mt-6">
-          {activeTab === "Videos" && <VideosTab />}
-          {activeTab === "Playlists" && <PlaylistsTab />}
-          {activeTab === "Tweets" && <TweetsTab />}
+           {activeTab === "Videos" && <VideosTab userId={channel?._id} />}
+          {/* {activeTab === "Playlists" && <PlaylistsTab userId={channel?._id} />}
+          {activeTab === "Tweets" && <TweetsTab userId={channel?._id} />} */}
         </div>
       </div>
     </div>

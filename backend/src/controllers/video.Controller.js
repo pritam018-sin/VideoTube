@@ -145,7 +145,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 });
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const videos = await Video.find({ isPublished: true }).populate('owner', 'username avatar');
+    const videos = await Video.find({ isPublished: true }).populate('owner', 'fullname username avatar');
 
     if (!videos || videos.length === 0) {
         return res.status(404).json(
@@ -153,19 +153,19 @@ const getAllVideos = asyncHandler(async (req, res) => {
         );
     }
     res.status(200).json(
-        new ApiResponse(200, videos, "All videos fetched successfully")
+        new ApiResponse(200, "All videos fetched successfully", videos)
     );
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
     const videoId = req.params.id;
     const video  = await Video.findById(videoId)
-        .populate('owner', 'username avatar')
+        .populate('owner', 'username avatar fullname')
         .populate({
             path: 'comments',
-            populate: { path: 'owner', select: 'username avatar' }
+            populate: { path: 'owner', select: 'fullname avatar username' }
         })
-        .populate('likes', 'username avatar');
+        .populate('likes', 'username avatar fullname');
 
    if (!video) {
        return res.status(404).json(
@@ -178,14 +178,14 @@ const getVideoById = asyncHandler(async (req, res) => {
    await video.save();
 
    res.status(200).json(
-       new ApiResponse(200, video, "Video fetched successfully")
+       new ApiResponse(200,"Video fetched successfully", video)
    );
 });
 
 const getUserVideos = asyncHandler(async (req, res) => {
     const {id} = req.params;
 
-    const userVideos = await Video.find({owner: id, isPublished: true});
+    const userVideos = await Video.find({owner: id, isPublished: true}).populate('owner', 'username avatar fullname');
 
    if (!userVideos || userVideos.length === 0) {
        return res.status(404).json(
@@ -194,7 +194,7 @@ const getUserVideos = asyncHandler(async (req, res) => {
    }
 
    res.status(200).json(
-       new ApiResponse(200, userVideos, "User videos fetched successfully")
+       new ApiResponse(200, "User videos fetched successfully", userVideos)
    );
 });
 

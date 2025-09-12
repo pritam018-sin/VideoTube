@@ -36,7 +36,7 @@ export default function ProfileMenu({ userInfo, onClose }) {
           My Profile
         </Link>
         <Link
-          to="/upload"
+          to="/upload-video"
           onClick={onClose}
           className="px-4 py-2 text-sm text-gray-200 hover:bg-white/10 transition rounded-md"
         >

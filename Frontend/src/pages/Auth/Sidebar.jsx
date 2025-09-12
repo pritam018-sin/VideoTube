@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { SiHomebridge, SiAirplayvideo } from "react-icons/si";
-import { FiSettings, } from "react-icons/fi";
+import { MdOutlineDashboardCustomize } from "react-icons/md";
+
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FaHistory } from "react-icons/fa";
@@ -54,19 +55,6 @@ const Sidebar = () => {
             </span>
           )}
         </Link>
-
-        {/* Settings */}
-        <Link
-          to="/setting"
-          className="flex items-center gap-3 px-2 transition-transform transform hover:translate-x-2 hover:text-purple-300"
-        >
-          <FiSettings size={26} />
-          {isExpanded && (
-            <span className="nav-item-name transition-opacity duration-300">
-              SETTINGS
-            </span>
-          )}
-        </Link>
         <Link
           to="/watch-history"
           className="flex items-center gap-3 px-2 transition-transform transform hover:translate-x-2 hover:text-purple-300"
@@ -79,6 +67,17 @@ const Sidebar = () => {
           )}
         </Link>
       </div>
+      <Link
+          to="/dashboard"
+          className="flex items-center gap-3 px-2 transition-transform transform hover:translate-x-2 hover:text-purple-300"
+        >
+          <MdOutlineDashboardCustomize size={26} />
+          {isExpanded && (
+            <span className="nav-item-name transition-opacity duration-300">
+              SETTINGS
+            </span>
+          )}
+        </Link>
     </div>
   );
 };
