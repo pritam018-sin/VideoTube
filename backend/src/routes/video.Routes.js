@@ -4,6 +4,7 @@ import { upload } from '../middlewares/mutler.Middleware.js';
 import { 
         deleteVideo,
         getAllVideos,
+        getMyVideos,
         getUserVideos,
         getVideoById,
         togglePublish, 
@@ -50,6 +51,7 @@ router.route("/all-videos").get(getAllVideos);
 router.route("/:id").get(getVideoById);
 router.route("/:id/like").post(verifyJWT, toggleLike("video"));
 router.route("/user-videos/:id").get(getUserVideos);
+router.route("/:userId/my-videos").get(verifyJWT, getMyVideos);
 
 // router.route("/like/:id").post(
 //     verifyJWT,

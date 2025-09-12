@@ -26,7 +26,41 @@ export const videoApiSlice = apiSlice.injectEndpoints({
         body: formData,
       }),
     }),
-  }),
+    updateVideoDetails: builder.mutation({
+      query: ({ videoId, details }) => ({
+        url: `${VIDEOS_URL}/update-video/${videoId}`,
+        method: "PUT",
+        body: details,
+      }),
+      invalidatesTags: ["Video"],
+    }),
+    updateThumbnail: builder.mutation({
+      query: ({ videoId, formData }) => ({
+        url: `${VIDEOS_URL}/update-thumbnail/${videoId}`,
+        method: "PUT",
+        body: formData,
+      }),
+      invalidatesTags: ["Video"],
+    }),
+    togglePublish: builder.mutation({
+      query: (videoId) => ({
+        url: `${VIDEOS_URL}/toggle-publish/${videoId}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Video"],
+    }),
+    deleteVideo: builder.mutation({
+      query: (videoId) => ({
+        url: `${VIDEOS_URL}/delete-video/${videoId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Video"],
+    }),
+    getMyVideos: builder.query({
+      query: (userId) => `${VIDEOS_URL}/${userId}/my-videos`,
+      providesTags: ["Video"],
+    })
+  }), 
 });
 
 export const {
@@ -34,4 +68,9 @@ export const {
   useGetVideoByIdQuery,
   useGetAllVideosQuery,
   useUploadVideoMutation,
+  useUpdateVideoDetailsMutation,
+  useUpdateThumbnailMutation,
+  useTogglePublishMutation,
+  useDeleteVideoMutation,
+  useGetMyVideosQuery,
 } = videoApiSlice;

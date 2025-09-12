@@ -197,7 +197,16 @@ const getUserVideos = asyncHandler(async (req, res) => {
        new ApiResponse(200, "User videos fetched successfully", userVideos)
    );
 });
+const getMyVideos = asyncHandler(async (req, res) => {
+    const userId = req.user._id; // login user id from auth middleware
 
+    const userVideos = await Video.find({ owner: userId })
+        .populate("owner", "username avatar fullname");
+
+    res.status(200).json(
+        new ApiResponse(200, "My videos fetched successfully", userVideos)
+    );
+});
 const toggleLikeVideo = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id;
@@ -229,5 +238,6 @@ export {
     deleteVideo,
     getAllVideos,
     getVideoById,
-    getUserVideos
+    getUserVideos,
+    getMyVideos
 }
