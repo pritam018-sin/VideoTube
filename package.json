@@ -15,6 +15,7 @@
     "nodemon": "^3.1.10"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.8",
     "@reduxjs/toolkit": "^2.9.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",

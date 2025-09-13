@@ -11,23 +11,23 @@ import { Comment } from "../models/comment.Model.js";
 
 const router = Router();
 
-router.route("/:id/comment").post(
+router.route("/:videoId/comment").post(
     verifyJWT,
     addComment
 );
-router.route("/:id/comments/:commentId").delete(
+router.route("/:videoId/comments/:commentId").delete(
     verifyJWT,
     deleteComment
 );
-router.route("/:id/comments/:commentId").put(
+router.route("/:videoId/comments/:commentId").put(
     verifyJWT,
     updateComment
 );
-router.route("/:id/video-comments").get(
+router.route("/:videoId/video-comments").get(
     verifyJWT,
     getVideoComments
 );
-router.route("/:id/like").post(
+router.route("/:commentId/like").post(
     verifyJWT,
     toggleLike(Comment)
 );

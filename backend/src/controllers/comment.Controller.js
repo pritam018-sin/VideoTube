@@ -6,19 +6,19 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import mongoose from "mongoose";
 
 const addComment = asyncHandler(async (req, res) => {
-    const {id} = req.params;
+    const {videoId} = req.params;
     const {content} = req.body;
 
     if (!content || content.trim() === "") {
         throw new ApiError(400, "Comment cannot be empty");
     }
 
-    const video = await Video.findById(id);
+    const video = await Video.findById(videoId);
     if (!video) throw new ApiError(404, "Video not found");
 
     const comment = await Comment.create({
         content: content.trim(),
-        video: id,
+        video: videoId,
         owner: req.user._id
     });
 
@@ -31,9 +31,9 @@ const addComment = asyncHandler(async (req, res) => {
 });
 
 const deleteComment = asyncHandler(async (req, res) => {
-    const { id, commentId } = req.params;
+    const { videoId, commentId } = req.params;
 
-    const video = await Video.findById(id);
+    const video = await Video.findById(videoId);
     if (!video) throw new ApiError(404, "Video not found");
 
     const comment = await Comment.findById(commentId);
@@ -93,40 +93,51 @@ const updateComment = asyncHandler(async (req, res) => {
 });
 
 
-// Get All Comments of a Video -- abhi axe se chal nhi raha bad me dekhunga
-const getVideoComments = asyncHandler(async (req, res) => {
-    const { videoId } = req.params;
 
-    // Aggregation pipeline
-    const comments = await Comment.aggregate([
+const getVideoComments = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+   
+  // ✅ Step 1: validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "Invalid video ID", videoId);
+  }
+
+  // ✅ Step 2: ensure video exists
+  const video = await Video.findById(videoId);
+  if (!video) throw new ApiError(404, "Video not found");
+
+  // ✅ Step 3: aggregation pipeline
+  const comments = await Comment.aggregate([
+    { $match: { video: new mongoose.Types.ObjectId(videoId) } },
     {
-        $match: { video: new mongoose.Types.ObjectId(videoId) }
-    },
-    {
-        $lookup: {
-            from: "users",
-            localField: "owner",
-            foreignField: "_id",
-            as: "ownerInfo"
-        }
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "ownerInfo",
+      },
     },
     { $unwind: "$ownerInfo" },
     { $sort: { createdAt: -1 } },
     {
-        $project: {
-            text: 1,
-            createdAt: 1,
-            "ownerInfo.username": 1,
-            "ownerInfo.avatar": 1
-        }
-    }
-]);
+      $project: {
+        content: 1,
+        text: 1,
+        createdAt: 1,
+        "ownerInfo.username": 1,
+        "ownerInfo.avatar": 1,
+        "ownerInfo._id": 1,
+        "ownerInfo.fullname": 1,
+        likes: { $size: { $ifNull: ["$likes", []] } },
+      },
+    },
+  ]);
 
-    return res.status(200).json({
-        status: "success",
-        comments
-    });
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Comments fetched successfully", comments));
 });
+
 
 export {
     addComment,

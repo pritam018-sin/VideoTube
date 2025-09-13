@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { SiHomebridge, SiAirplayvideo } from "react-icons/si";
-import { MdOutlineDashboardCustomize } from "react-icons/md";
-
+import { MdOutlineDashboardCustomize, MdOutlineSubscriptions } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FaHistory } from "react-icons/fa";
@@ -38,7 +37,7 @@ const Sidebar = () => {
           <SiHomebridge size={26} />
           {isExpanded && (
             <span className="nav-item-name transition-opacity duration-300">
-              HOME
+              Home
             </span>
           )}
         </Link>
@@ -51,7 +50,18 @@ const Sidebar = () => {
           <SiAirplayvideo size={26} />
           {isExpanded && (
             <span className="nav-item-name transition-opacity duration-300">
-              YOUR CHANNEL
+              Your Channel
+            </span>
+          )}
+        </Link>
+        <Link
+          to={`/user-channel/${username}`}
+          className="flex items-center gap-3 px-2 transition-transform transform hover:translate-x-2 hover:text-purple-300"
+        >
+          <MdOutlineSubscriptions size={26} />
+          {isExpanded && (
+            <span className="nav-item-name transition-opacity duration-300">
+              Subcriptions
             </span>
           )}
         </Link>
@@ -62,7 +72,7 @@ const Sidebar = () => {
           <FaHistory size={26} />
           {isExpanded && (
             <span className="nav-item-name transition-opacity duration-300">
-              WATCH HISTORY
+              Watch History
             </span>
           )}
         </Link>
@@ -74,7 +84,7 @@ const Sidebar = () => {
           <MdOutlineDashboardCustomize size={26} />
           {isExpanded && (
             <span className="nav-item-name transition-opacity duration-300">
-              SETTINGS
+              DASHBOARD
             </span>
           )}
         </Link>

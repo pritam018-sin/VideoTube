@@ -3,16 +3,26 @@ import { useParams } from "react-router-dom";
 import { useGetVideoByIdQuery } from "../redux/api/videoApiSlice.js";
 import VideoDescription from "../components/VideoDescription.jsx";
 import { useNavigate } from "react-router-dom";
+import CommentList from "../components/CommentList.jsx";
+import { useSelector } from "react-redux";
+import AddComment from "../components/AddComments.jsx";
+import { useGetUserChannelProfileQuery } from "../redux/api/userApiSlice.js";
+import Subscription from "../components/Subscription.jsx";
 
 const WatchPage = () => {
+    const { userInfo } = useSelector((state) => state.auth);
     const { videoId } = useParams();
     const { data, isLoading, error } = useGetVideoByIdQuery(videoId);
+    const {data: channelData} = useGetUserChannelProfileQuery(data?.data.owner?.username);
+    console.log(channelData);
     const navigate = useNavigate();
 
     if (isLoading) return <p className="text-gray-400">Loading video...</p>;
     if (error) return <p className="text-red-500">Error loading video.</p>;
 
     const video = data?.data || data; // depends on backend response
+    
+
     const handleClickChannel = () => {
         navigate(`/user-channel/${video.owner?.username}`);
     };
@@ -39,7 +49,8 @@ const WatchPage = () => {
             <VideoDescription description={video.description} />
 
             {/* Channel Info */}
-            <div
+            <div className="flex items-center justify-between max-w-3xl mt-6">
+               <div
                 className="flex items-center gap-3 mt-4 p-2 rounded-md group cursor-pointer w-fit
              hover:bg-gray-900/20 transition-colors duration-300"
                 onClick={handleClickChannel}
@@ -52,9 +63,19 @@ const WatchPage = () => {
                 <span className="text-sm font-medium text-white transition-colors duration-300 group-hover:text-red-500">
                     {video.owner.fullname}
                 </span>
+                <span className="text-sm text-gray-500"> · {channelData?.data?.subscribersCount} subscribers</span>
+            </div> 
+            <Subscription channelId={video.owner._id} isSubscribed={channelData?.data?.isSubscribed} />
             </div>
+            
+                
 
             {/* TODO: Likes, Comments, Related videos, etc. */}
+            <div>
+                <h2 className="mt-6 text-xl font-semibold">Comments Section</h2>
+                <AddComment videoId={videoId} />
+                <CommentList videoId={videoId} currentUserId={userInfo?._id} />
+            </div>
         </div>
     );
 };
