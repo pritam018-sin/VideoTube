@@ -448,56 +448,52 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         new ApiResponse(200,"User channel profile fetched successfully", channel[0])
     );
 });
+const addToWatchHistory = asyncHandler(async (req, res) => {
+  const userId = req.user._id;   // 👈 authMiddleware se aa raha
+  const { videoId } = req.body; // 👈 frontend se bhejna padega
+
+  if (!videoId) {
+    return res.status(400).json(new ApiResponse(400, null, "Video ID is required"));
+  }
+
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { $addToSet: { watchHistory: videoId } }, // 👈 duplicate avoid karega
+    { new: true }
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200,"Video added to watch history", user.watchHistory)
+  );
+});
 
 const getWatchHistory = asyncHandler(async (req, res) => {
-    const user = await User.aggregate([
-        {
-            $match: {
-                _id: new mongoose.Types.ObjectId(req.user?._id)
-            }
-        },
-        {
-            $lookup: {
-                from: "videos",
-                localField: "watchHistory",
-                foreignField: "_id",
-                as: "watchHistory",
-                pipeline: [
-                    {
-                        $lookup: {
-                            from: "users",
-                            localField: "owner",
-                            foreignField: "_id",
-                            as: "owner",
-                            pipeline: [
-                                {
-                                    $project: {
-                                        fullname: 1,
-                                        username: 1,
-                                        avatar: 1
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        $addFields: {
-                            owner: {
-                                $first: "$owner"
-                            }
-                        }
-                    }
-                ]
-            }
-        }
-    ])
+  const userId = req.user._id
 
-    return res.status(200).json(
-        new ApiResponse(200,"Watch history fetched successfully", user[0].watchHistory)
-    );
-})
+  const user = await User.findById(userId);
 
-export { 
+  if (!user) {
+    return res.status(404).json(new ApiResponse(404, null, "User not found"));
+  }
+
+
+  const populatedUser = await User.findById(userId)
+    .populate({
+      path: "watchHistory",
+      populate: {
+        path: "owner",
+        select: "fullname username avatar",
+      },
+    });
+
+  return res.status(200).json(
+    new ApiResponse(200, "Watch history fetched successfully", populatedUser.watchHistory)
+  );
+});
+
+
+
+export {
     registerUser,
     loginUser,
     logoutUser,
@@ -508,6 +504,7 @@ export {
     updateUserAvatar,
     updateUserCoverImage,
     getUserChannelProfile,
-    getWatchHistory
+    getWatchHistory,
+    addToWatchHistory
 
  };

@@ -9,10 +9,17 @@ export const subscriptionApiSlice = apiSlice.injectEndpoints({
                 method: "POST",
             }),
             invalidatesTags: (result, error, channelId) => [{ type: "Subscription", id: channelId }],
-        })
+        }),
+        getSubscriptions: builder.query({
+            query: (userId) => ({
+                url: `${SUBSCRIPTIONS_URL}/${userId}/subscriptions`,
+                method: "GET",
+            })
+        }),
     })
 })
 
 export const {
     useSubscribeToggleMutation,
+    useGetSubscriptionsQuery,
 } = subscriptionApiSlice;

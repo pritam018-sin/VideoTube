@@ -9,10 +9,8 @@ const Subscription = ({ channelId, isSubscribed: initialSubscribed }) => {
   const navigate = useNavigate();
   const [subscribeToggle, { isLoading }] = useSubscribeToggleMutation();
 
-  // local state maintain karne ke liye
   const [subscribed, setSubscribed] = useState(initialSubscribed);
 
-  // agar parent se prop update ho jaye (e.g. video change), to sync karne ke liye
   useEffect(() => {
     setSubscribed(initialSubscribed);
   }, [initialSubscribed]);
@@ -23,9 +21,12 @@ const Subscription = ({ channelId, isSubscribed: initialSubscribed }) => {
       return;
     }
 
+    // prevent subscribing to own channel
+    if (userInfo._id === channelId) return;
+
     try {
       await subscribeToggle(channelId).unwrap();
-      setSubscribed((prev) => !prev); // toggle state instantly
+      setSubscribed((prev) => !prev);
       toast.success(
         subscribed ? "Unsubscribed successfully" : "Subscribed successfully"
       );
@@ -35,17 +36,25 @@ const Subscription = ({ channelId, isSubscribed: initialSubscribed }) => {
     }
   };
 
+  const isOwnChannel = userInfo?._id === channelId;
+
   return (
     <button
       onClick={handleSubscribe}
-      disabled={isLoading}
+      disabled={isLoading || isOwnChannel}
       className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-        subscribed
+        isOwnChannel
+          ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+          : subscribed
           ? "bg-gray-700 text-white hover:bg-gray-600"
           : "bg-red-600 text-white hover:bg-red-700"
       }`}
     >
-      {subscribed ? "Unsubscribe" : "Subscribe"}
+      {isOwnChannel
+        ? "Subscribe"
+        : subscribed
+        ? "Unsubscribe"
+        : "Subscribe"}
     </button>
   );
 };

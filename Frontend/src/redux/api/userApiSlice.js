@@ -63,16 +63,23 @@ export const userApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["User"],
     }),
+    addToWatchHistory: builder.mutation({
+      query: (videoId) => ({
+        url: `${USERS_URL}/watch-history`,
+        method: "POST",
+        body: { videoId },
+      }),
+    }),
+
     watchHistory: builder.query({
       query: () => ({
         url: `${USERS_URL}/watch-history`,
         method: "GET",
       }),
       providesTags: ["User"],
-    })
+    }),
   }),
 });
-
 
 export const {
   useLoginMutation,
@@ -80,8 +87,9 @@ export const {
   useLogoutMutation,
   useGetCurrentUserQuery,
   useUpdateAccountDetailsMutation,
-  useUpdateAvatarMutation,  
+  useUpdateAvatarMutation,
   useUpdateCoverMutation,
   useGetUserChannelProfileQuery,
   useWatchHistoryQuery,
+  useAddToWatchHistoryMutation,
 } = userApiSlice;

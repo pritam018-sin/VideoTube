@@ -11,7 +11,7 @@ router.route("/:channelId/subscribe").post(
     verifyJWT,
     toggleSubscription
 );
-router.route("/:channelId/subscriptions").get(
+router.route("/:userId/subscriptions").get(
     verifyJWT,
     getSubscribedChannels
 );

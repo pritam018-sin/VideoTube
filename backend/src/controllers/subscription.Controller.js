@@ -33,7 +33,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     const userId = req.user._id;  // logged-in user
 
     // Find all subscriptions where user is the subscriber
-    const subscriptions = await Subscription.find({ subscriber: userId }).populate("channel", "name avatar");
+    const subscriptions = await Subscription.find({ subscriber: userId }).populate("channel", "fullname avatar username");
 
     if (!subscriptions.length) {
         throw new ApiError(404, "You haven't subscribed to any channels yet");
@@ -42,7 +42,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     // Map to return only channel info
     const channels = subscriptions.map(sub => sub.channel);
 
-    res.status(200).json(new ApiResponse(200, { channels }, "Subscribed channels fetched successfully"));
+    res.status(200).json(new ApiResponse(200, "Subscribed channels fetched successfully", { channels }));
 });
 export {
     toggleSubscription,

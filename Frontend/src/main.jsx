@@ -24,6 +24,7 @@ import WatchPage from './pages/WatchPage.jsx';
 import HomePage from './pages/HomePage.jsx';
 import UploadVideo from './pages/Video/UploadVideo.jsx';
 import UserDashboard from './pages/User/UserDashboard.jsx';
+import UserSubscriptionList from './pages/User/UserSubscriptionList.jsx';
 
 
 const router = createBrowserRouter(
@@ -42,6 +43,7 @@ const router = createBrowserRouter(
         <Route path="watch/:videoId" element={<WatchPage />} />
         <Route path="upload-video" element={<UploadVideo />} />
         <Route path="dashboard" element={<UserDashboard />} />
+        <Route path="subscriptions" element={<UserSubscriptionList />} />
 
         {/* <Route path="dashboard" element={<Dashboard />} /> */}
       </Route>

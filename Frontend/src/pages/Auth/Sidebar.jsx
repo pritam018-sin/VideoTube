@@ -55,7 +55,7 @@ const Sidebar = () => {
           )}
         </Link>
         <Link
-          to={`/user-channel/${username}`}
+          to="/subscriptions"
           className="flex items-center gap-3 px-2 transition-transform transform hover:translate-x-2 hover:text-purple-300"
         >
           <MdOutlineSubscriptions size={26} />

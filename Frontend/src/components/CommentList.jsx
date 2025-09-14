@@ -7,6 +7,7 @@ import {
 import { Menu } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { format } from "timeago.js";
+import { Link } from "react-router-dom";
 
 const CommentList = ({ videoId, currentUserId }) => {
   const { data, isLoading } = useGetVideoCommentsQuery(videoId);
@@ -47,26 +48,37 @@ const CommentList = ({ videoId, currentUserId }) => {
 
       {comments.map((c) => (
         <div key={c._id} className="flex items-start gap-3">
-          {/* Avatar */}
-          <img
-            src={c.ownerInfo?.avatar || "/default-avatar.png"}
-            alt="avatar"
-            className="w-10 h-10 rounded-full"
-          />
+          {/* Avatar → Clickable */}
+          <Link to={`/user-channel/${c.ownerInfo?.username}`}>
+            <img
+              src={c.ownerInfo?.avatar || "/default-avatar.png"}
+              alt="avatar"
+              className="w-10 h-10 rounded-full hover:opacity-80 transition"
+            />
+          </Link>
 
           {/* Comment body */}
           <div className="flex-1">
             {/* Top row: username + time + menu */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-white font-medium">{c.ownerInfo?.fullname}</span>
-                <span className="text-xs text-gray-400">{format(c.createdAt)}</span>
+                <Link
+                  to={`/user-channel/${c.ownerInfo?.username}`}
+                  className="text-white font-medium hover:underline"
+                >
+                  {c.ownerInfo?.fullname}
+                </Link>
+                <span className="text-xs text-gray-400">
+                  {format(c.createdAt)}
+                </span>
               </div>
 
-              {(c.ownerInfo?._id === currentUserId) && (
+              {c.ownerInfo?._id === currentUserId && (
                 <Menu as="div" className="relative inline-block text-left">
-                  <Menu.Button className="text-gray-400 hover:text-white">⋮</Menu.Button>
-                  <Menu.Items className="absolute right-0 mt-2 w-32 bg-gray-800 rounded-lg shadow-lg p-1">
+                  <Menu.Button className="text-gray-400 hover:text-white">
+                    ⋮
+                  </Menu.Button>
+                  <Menu.Items className="absolute right-0 mt-2 w-32 bg-gray-800 rounded-lg shadow-lg p-1 z-10">
                     <Menu.Item>
                       {({ active }) => (
                         <button
@@ -109,7 +121,7 @@ const CommentList = ({ videoId, currentUserId }) => {
                 />
                 <button
                   onClick={() => handleUpdate(c._id)}
-                  className="px-3 py-1 bg-green-600 rounded-lg text-white"
+                  className="px-3 py-1 bg-green-600 rounded-lg text-white hover:bg-green-700"
                 >
                   Save
                 </button>
