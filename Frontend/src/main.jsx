@@ -25,6 +25,7 @@ import HomePage from './pages/HomePage.jsx';
 import UploadVideo from './pages/Video/UploadVideo.jsx';
 import UserDashboard from './pages/User/UserDashboard.jsx';
 import UserSubscriptionList from './pages/User/UserSubscriptionList.jsx';
+import ChangePassword from './pages/User/ChangePassword.jsx';
 
 
 const router = createBrowserRouter(
@@ -38,6 +39,7 @@ const router = createBrowserRouter(
         <Route path="update-account-details" element={<UpdateProfile />} />
         <Route path="update-avatar" element={<UpdateAvatar />} />
         <Route path="update-cover-image" element={<UpdateCover />} />
+        <Route path="change-password" element={<ChangePassword />} />
         <Route path="user-channel/:username" element={<UserChannel />} />
         <Route path="watch-history" element={<WatchHistory />} />
         <Route path="watch/:videoId" element={<WatchPage />} />

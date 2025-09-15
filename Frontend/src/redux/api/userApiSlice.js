@@ -56,6 +56,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    changePassword: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/change-password`,
+        method: "POST",
+        body: data,
+      }),
+    }),
     getUserChannelProfile: builder.query({
       query: (username) => ({
         url: `${USERS_URL}/channel/${username}`,
@@ -92,4 +99,5 @@ export const {
   useGetUserChannelProfileQuery,
   useWatchHistoryQuery,
   useAddToWatchHistoryMutation,
+  useChangePasswordMutation,
 } = userApiSlice;
