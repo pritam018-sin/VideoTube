@@ -12,9 +12,9 @@ import {
 const router = Router();
 
 router.route('/create-tweet').post(verifyJWT, createTweet)
-router.route('/update-tweet/:id').put(verifyJWT, updateTweet)   
-router.route('/delete-tweet/:id').delete(verifyJWT, deleteTweet)  
-router.route('/user-tweets/:id').get(verifyJWT, getUserTweets)
+router.route('/update-tweet/:tweetId').put(verifyJWT, updateTweet)   
+router.route('/delete-tweet/:tweetId').delete(verifyJWT, deleteTweet)  
+router.route('/user-tweets/:userId').get(verifyJWT, getUserTweets)
 router.route('/all-tweets').get(verifyJWT, getAllTweets)
 router.route('/:id').get(verifyJWT, getTweet)
 export default router;

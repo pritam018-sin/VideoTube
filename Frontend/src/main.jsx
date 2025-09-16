@@ -28,7 +28,8 @@ import UserSubscriptionList from './pages/User/UserSubscriptionList.jsx';
 import ChangePassword from './pages/User/ChangePassword.jsx';
 import PlaylistDetails from './pages/PlaylistDetails.jsx';
 import PlaylistSection from './pages/PlaylistSection.jsx';
-
+import TweetsPage from './pages/TweetsPage.jsx';
+import SingleTweets from './pages/tweets/SingleTweets.jsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -50,6 +51,9 @@ const router = createBrowserRouter(
         <Route path="subscriptions" element={<UserSubscriptionList />} />
         <Route path="playlists" element={<PlaylistSection />} />
         <Route path="playlist/:playlistId" element={<PlaylistDetails />} />
+        <Route path="tweets" element={<TweetsPage />} />
+        <Route path='tweets/:tweetId' element = {<SingleTweets/>} />
+
 
         {/* <Route path="dashboard" element={<Dashboard />} /> */}
       </Route>

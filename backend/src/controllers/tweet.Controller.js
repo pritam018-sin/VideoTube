@@ -6,9 +6,10 @@ import mongoose from "mongoose";
 
 const createTweet = asyncHandler(async (req, res) => {
     const { content } = req.body;
+    console.log("Creating tweet with content:", content);   
 
     if (!content) {
-        throw new ApiError('Content is required', 400);
+        throw new ApiError(400, 'Content is required');
     }
 
     const newTweet = await Tweet.create({
@@ -21,8 +22,8 @@ const createTweet = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                newTweet,
-                "Tweet created successfully"
+                "Tweet created successfully",
+                newTweet
             )
         );
 });
@@ -35,7 +36,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     }
 
     const updatedTweet = await Tweet.findByIdAndUpdate(
-        req.params.id,
+        req.params.tweetId,
         { $set: { content } },
         { new: true }
     );
@@ -49,14 +50,14 @@ const updateTweet = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                updatedTweet,
-                "Tweet updated successfully"
+                "Tweet updated successfully",
+                updatedTweet
             )
         );
 });
 
 const deleteTweet = asyncHandler(async (req, res) => {
-    const deletedTweet = await Tweet.findByIdAndDelete(req.params.id);
+    const deletedTweet = await Tweet.findByIdAndDelete(req.params.tweetId);
 
     if (!deletedTweet) {
         throw new ApiError('Tweet not found', 404);
@@ -67,14 +68,14 @@ const deleteTweet = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                deletedTweet,
-                "Tweet deleted successfully"
+                "Tweet deleted successfully",
+                deletedTweet
             )
         );
 });
 
 const getUserTweets = asyncHandler(async (req, res) => {
-    const userId = req.params.id;
+    const userId = req.params.userId;
 
     const tweets = await Tweet.aggregate([
         { $match: { owner: new mongoose.Types.ObjectId(userId) } },
@@ -94,8 +95,8 @@ const getUserTweets = asyncHandler(async (req, res) => {
                 createdAt: 1,
                 "owner._id": 1,
                 "owner.username": 1,
-                "owner.email": 1,
-                "owner.profilePic": 1
+                "owner.fullname": 1,
+                "owner.avatar": 1
             }
         }
     ]);
@@ -105,8 +106,8 @@ const getUserTweets = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                tweets,
-                "User tweets fetched successfully"
+                "User tweets fetched successfully",
+                tweets
             )
         );
 });
@@ -131,8 +132,8 @@ const getTweet = asyncHandler(async (req, res) => {
                 createdAt: 1,
                 "owner._id": 1,
                 "owner.username": 1,
-                "owner.email": 1,
-                "owner.profilePic": 1
+                "owner.fullname": 1,
+                "owner.avatar": 1
             }
         }
     ]);
@@ -146,8 +147,8 @@ const getTweet = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                tweet[0],
-                "Tweet fetched successfully"
+                "Tweet fetched successfully",
+                tweet[0]
             )
         );
 });
@@ -171,8 +172,8 @@ const getAllTweets = asyncHandler(async (req, res) => {
                 createdAt: 1,
                 "owner._id": 1,
                 "owner.username": 1,
-                "owner.email": 1,
-                "owner.profilePic": 1
+                "owner.fullname": 1,
+                "owner.avatar": 1
             }
         }
     ]);
@@ -194,8 +195,8 @@ const getAllTweets = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                tweets,
-                "All tweets fetched successfully"
+                "All tweets fetched successfully",
+                tweets
             )
         );
 });
