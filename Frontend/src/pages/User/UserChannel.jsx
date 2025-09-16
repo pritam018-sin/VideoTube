@@ -91,8 +91,8 @@ const UserChannel = () => {
         {/* Tab Content */}
         <div className="mt-6">
            {activeTab === "Videos" && <VideosTab userId={channel?._id} />}
-          {/* {activeTab === "Playlists" && <PlaylistsTab userId={channel?._id} />}
-          {activeTab === "Tweets" && <TweetsTab userId={channel?._id} />} */}
+           {activeTab === "Playlists" && <PlaylistsTab userId={channel?._id} />}
+         {/* {activeTab === "Tweets" && <TweetsTab userId={channel?._id} />} */}
         </div>
       </div>
     </div>

@@ -26,6 +26,8 @@ import UploadVideo from './pages/Video/UploadVideo.jsx';
 import UserDashboard from './pages/User/UserDashboard.jsx';
 import UserSubscriptionList from './pages/User/UserSubscriptionList.jsx';
 import ChangePassword from './pages/User/ChangePassword.jsx';
+import PlaylistDetails from './pages/PlaylistDetails.jsx';
+import PlaylistSection from './pages/PlaylistSection.jsx';
 
 
 const router = createBrowserRouter(
@@ -46,6 +48,8 @@ const router = createBrowserRouter(
         <Route path="upload-video" element={<UploadVideo />} />
         <Route path="dashboard" element={<UserDashboard />} />
         <Route path="subscriptions" element={<UserSubscriptionList />} />
+        <Route path="playlists" element={<PlaylistSection />} />
+        <Route path="playlist/:playlistId" element={<PlaylistDetails />} />
 
         {/* <Route path="dashboard" element={<Dashboard />} /> */}
       </Route>

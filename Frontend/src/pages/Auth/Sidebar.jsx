@@ -3,7 +3,9 @@ import { SiHomebridge, SiAirplayvideo } from "react-icons/si";
 import { MdOutlineDashboardCustomize, MdOutlineSubscriptions } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { FaHistory } from "react-icons/fa";
+import { FaHistory, FaRetweet } from "react-icons/fa";
+import { RiPlayList2Fill } from "react-icons/ri";
+
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -62,6 +64,28 @@ const Sidebar = () => {
           {isExpanded && (
             <span className="nav-item-name transition-opacity duration-300">
               Subcriptions
+            </span>
+          )}
+        </Link>
+        <Link
+          to="/playlists"
+          className="flex items-center gap-3 px-2 transition-transform transform hover:translate-x-2 hover:text-purple-300"
+        >
+          <RiPlayList2Fill size={26} />
+          {isExpanded && (
+            <span className="nav-item-name transition-opacity duration-300">
+              Playlists
+            </span>
+          )}
+        </Link>
+        <Link
+          to="/tweets"
+          className="flex items-center gap-3 px-2 transition-transform transform hover:translate-x-2 hover:text-purple-300"
+        >
+          <FaRetweet size={26} />
+          {isExpanded && (
+            <span className="nav-item-name transition-opacity duration-300">
+              Tweets
             </span>
           )}
         </Link>

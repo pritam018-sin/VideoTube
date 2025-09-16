@@ -26,10 +26,10 @@ const createPlayList = asyncHandler(async (req, res) => {
    .json(
         new ApiResponse(
             200,
+             "Playlist created successfully",
             {
                 populatedPlaylist
-            },
-            "Playlist created successfully"
+            }
         )
    )
 
@@ -44,7 +44,7 @@ const updatePlayList = asyncHandler(async (req, res) => {
     }
 
     const updatedPlayList = await PlayList.findByIdAndUpdate(
-        req.params?.id,
+        req.params?.playlistId,
         {
             $set: {
                 name,
@@ -69,8 +69,7 @@ const updatePlayList = asyncHandler(async (req, res) => {
 
 //delete Playlist
 const deletePlayList = asyncHandler(async (req, res) => {
-    const deletedPlayList = await PlayList.findByIdAndDelete(req.params?.id);
-
+    const deletedPlayList = await PlayList.findByIdAndDelete(req.params?.playlistId);
     if (!deletedPlayList) {
         throw new ApiError("Playlist not found", 404);
     }
@@ -183,10 +182,10 @@ const getUserAllPlayLists = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
+                "Playlists fetched successfully",
                 {
                     playlists
-                },
-                "Playlists fetched successfully"
+                }
             )
         );
 });
@@ -196,7 +195,9 @@ const getSinglePlayList = asyncHandler(async (req, res) => {
     const { playlistId } = req.params;
 
 
-    const playlist = await PlayList.findById(playlistId).populate("videos");
+    const playlist = await PlayList.findById(playlistId)
+                    .populate("videos")
+                    .populate("owner", "username email fullname avatar");
 
     if (!playlist) {
         throw new ApiError("Playlist not found", 404);
@@ -207,10 +208,10 @@ const getSinglePlayList = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
+                "Playlist fetched successfully",
                 {
                     playlist
-                },
-                "Playlist fetched successfully"
+                }
             )
         );
 });

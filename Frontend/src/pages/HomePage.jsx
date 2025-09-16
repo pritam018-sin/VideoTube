@@ -2,11 +2,15 @@ import React from "react";
 import { useGetAllVideosQuery } from "../redux/api/videoApiSlice";
 import { Link } from "react-router-dom";
 import { format } from "timeago.js";
+import { formatDuration } from "../utils/formatDuration.js";
+// import PlaylistMenu from "./playlist/PlaylistMenu.jsx";
+// import { useSelector } from "react-redux";
 
 const HomePage = () => {
+  // const userInfo = useSelector((state) => state.auth);
   const { data, isLoading, error } = useGetAllVideosQuery();
   const videos = data?.data || [];
-
+  // const userId = userInfo?._id;
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Error loading videos</p>;
 
@@ -23,7 +27,7 @@ const HomePage = () => {
                 className="w-full h-60 object-cover border border-gray-700 rounded-lg shadow-lg"
               />
               <span className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                {video.duration || "00:00"}
+                {formatDuration(video.duration)}
               </span>
             </div>
           </Link>
@@ -45,7 +49,9 @@ const HomePage = () => {
                 <h3 className="text-lg font-medium text-white line-clamp-1 hover:text-red-500 transition-colors">
                   {video.title}
                 </h3>
+
               </Link>
+              {/* <PlaylistMenu userId={userId} videoId={video._id} /> */}
 
               {/* Owner name */}
               <Link
