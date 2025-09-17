@@ -5,8 +5,10 @@ import {
         deleteVideo,
         getAllVideos,
         getMyVideos,
+        getTopVideos,
         getUserVideos,
         getVideoById,
+        searchVideos,
         togglePublish, 
         updateVideo,
         updateVideoThumbnail,
@@ -47,9 +49,12 @@ router.route("/delete-video/:id").delete(
     verifyJWT,
     deleteVideo
 );
+router.route("/search").get(searchVideos);
+router.route("/top").get(getTopVideos);
 router.route("/all-videos").get(getAllVideos);
 router.route("/:id").get(getVideoById);
 router.route("/:id/like").post(verifyJWT, toggleLike("video"));
+
 router.route("/user-videos/:id").get(getUserVideos);
 router.route("/:userId/my-videos").get(verifyJWT, getMyVideos);
 

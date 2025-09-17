@@ -30,6 +30,7 @@ import PlaylistDetails from './pages/PlaylistDetails.jsx';
 import PlaylistSection from './pages/PlaylistSection.jsx';
 import TweetsPage from './pages/TweetsPage.jsx';
 import SingleTweets from './pages/tweets/SingleTweets.jsx';
+import VideoSearchPage from './pages/Video/VideoSearchPage.jsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -53,7 +54,7 @@ const router = createBrowserRouter(
         <Route path="playlist/:playlistId" element={<PlaylistDetails />} />
         <Route path="tweets" element={<TweetsPage />} />
         <Route path='tweets/:tweetId' element = {<SingleTweets/>} />
-
+        <Route path="/search" element={<VideoSearchPage />} />
 
         {/* <Route path="dashboard" element={<Dashboard />} /> */}
       </Route>

@@ -17,7 +17,7 @@ export const videoApiSlice = apiSlice.injectEndpoints({
         url: `${VIDEOS_URL}/upload-content`,
         method: "POST",
         body: formData,
-      })
+      }),
     }),
     uploadThumbnail: builder.mutation({
       query: ({ videoId, formData }) => ({
@@ -59,8 +59,21 @@ export const videoApiSlice = apiSlice.injectEndpoints({
     getMyVideos: builder.query({
       query: (userId) => `${VIDEOS_URL}/${userId}/my-videos`,
       providesTags: ["Video"],
-    })
-  }), 
+    }),
+    searchVideos: builder.query({
+      query: (q) => ({
+        url: `${VIDEOS_URL}/search?query=${q}`,
+        method: "GET"
+      }),
+      providesTags: ["Video"]
+
+    }),
+    topVideos: builder.query({
+      query: () => `${VIDEOS_URL}/top`,
+      method: "GET"
+    }),
+    
+  }),
 });
 
 export const {
@@ -73,4 +86,6 @@ export const {
   useTogglePublishMutation,
   useDeleteVideoMutation,
   useGetMyVideosQuery,
+  useSearchVideosQuery,
+  useTopVideosQuery,
 } = videoApiSlice;
