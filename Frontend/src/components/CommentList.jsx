@@ -53,10 +53,15 @@ const CommentList = ({ videoId, currentUserId }) => {
   };
 
   const handleLike = async (commentId) => {
+    if (!currentUserId) {
+      toast.info("Please login to like comments");
+      return;
+    }
     try {
       await toggleCommentLike(commentId).unwrap();
+      refetch();
     } catch (error) {
-      toast.error("Failed to like comment");
+      toast.error(error?.data?.message || "Failed to like comment");
     }
   };
 

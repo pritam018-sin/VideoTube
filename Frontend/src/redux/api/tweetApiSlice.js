@@ -23,12 +23,14 @@ export const tweetApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: { content },
       }),
+      invalidatesTags: ["Tweet"],
     }),
     getTweet: builder.query({
       query: (tweetId) => ({
         url: `${TWEETS_URL}/${tweetId}`,
         method: "GET",
       }),
+      providesTags: (result, error, tweetId) => [{ type: "Tweet", id: tweetId }, "Tweet"],
     }),
     updateTweet: builder.mutation({
       query: ({ tweetId, content }) => ({
@@ -36,6 +38,7 @@ export const tweetApiSlice = apiSlice.injectEndpoints({
         method: "PUT",
         body: { content },
       }),
+      invalidatesTags: ["Tweet"],
     }),
 
     deleteTweet: builder.mutation({

@@ -20,24 +20,33 @@ const uploadContent = asyncHandler(async (req, res) => {
   const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path;
 
   if (!videoLocalPath || !thumbnailLocalPath) {
-    throw new ApiError(400, "Video and thumbnail are required");
+    throw new ApiError(400, "Both video file and thumbnail are required");
   }
 
   // upload video to cloudinary
   const uploadedVideo = await cloudinaryUpload(videoLocalPath);
+  if (!uploadedVideo || !uploadedVideo.secure_url) {
+    throw new ApiError(500, "Failed to upload video to Cloudinary. Please try again.");
+  }
 
   // upload thumbnail to cloudinary
   const uploadedThumbnail = await cloudinaryUpload(thumbnailLocalPath);
+  if (!uploadedThumbnail || !uploadedThumbnail.secure_url) {
+    throw new ApiError(500, "Failed to upload thumbnail to Cloudinary. Please try again.");
+  }
+
+  // Default to published (true) unless explicitly set to false
+  const shouldPublish = isPublished === undefined || isPublished === "true" || isPublished === true;
 
   // save in DB
   const video = await Video.create({
-    videoFile: uploadedVideo.secure_url,
-    thumbnail: uploadedThumbnail.secure_url,
+    videoFile: ensureHttps(uploadedVideo.secure_url),
+    thumbnail: ensureHttps(uploadedThumbnail.secure_url),
     title: title.trim(),
     description: description.trim(),
-    duration: uploadedVideo.duration, // ⚡ Cloudinary gives duration
+    duration: typeof uploadedVideo.duration === "number" ? Math.round(uploadedVideo.duration) : 0,
     owner: req.user._id,
-    isPublished: isPublished ?? false,
+    isPublished: shouldPublish,
   });
 
   res

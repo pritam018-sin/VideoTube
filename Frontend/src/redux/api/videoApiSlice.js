@@ -19,6 +19,7 @@ export const videoApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: formData,
       }),
+      invalidatesTags: ["Video"],
     }),
     uploadThumbnail: builder.mutation({
       query: ({ videoId, formData }) => ({

@@ -1,6 +1,7 @@
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGetTweetQuery, useToggleTweetLikeMutation } from "../../redux/api/tweetApiSlice";
+import { useSelector } from "react-redux";
 import { format } from "timeago.js";
 import { Heart, MessageCircle, Share2, ArrowLeft } from "lucide-react";
 import TweetUtils from "../../components/TweetUtils";
@@ -9,15 +10,20 @@ import { ensureHttps } from "../../utils/url.js";
 
 const SingleTweets = () => {
   const { tweetId } = useParams();
+  const { userInfo } = useSelector((state) => state.auth);
   const { data, isLoading, isError, refetch } = useGetTweetQuery(tweetId);
   const [toggleTweetLike] = useToggleTweetLikeMutation();
 
   const handleLike = async () => {
+    if (!userInfo) {
+      toast.info("Please login to like tweets");
+      return;
+    }
     try {
       await toggleTweetLike(tweetId).unwrap();
       refetch();
     } catch (err) {
-      toast.error("Failed to like tweet");
+      toast.error(err?.data?.message || "Failed to like tweet");
     }
   };
 
@@ -28,20 +34,22 @@ const SingleTweets = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-24 text-gray-400">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mr-3" />
-        Loading tweet...
+      <div className="min-h-screen pt-28 flex flex-col justify-center items-center text-gray-400">
+        <div className="w-10 h-10 border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin mb-4" />
+        <p className="text-sm font-medium">Loading discussion...</p>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="max-w-2xl mx-auto mt-20 text-center p-8 bg-red-950/20 border border-red-500/30 rounded-2xl text-red-400">
-        <p className="font-semibold text-lg">Failed to load this tweet 😢</p>
-        <Link to="/tweets" className="inline-block mt-4 text-sm text-blue-400 hover:underline">
-          Back to all tweets
-        </Link>
+      <div className="min-h-screen pt-28 px-4 max-w-2xl mx-auto text-center">
+        <div className="p-8 bg-red-950/20 border border-red-500/30 rounded-2xl text-red-400">
+          <p className="font-semibold text-lg">Failed to load this discussion 😢</p>
+          <Link to="/tweets" className="inline-block mt-4 text-sm text-blue-400 hover:underline">
+            Back to all community discussions
+          </Link>
+        </div>
       </div>
     );
   }
@@ -50,14 +58,14 @@ const SingleTweets = () => {
 
   if (!tweet) {
     return (
-      <div className="max-w-2xl mx-auto mt-20 text-center text-gray-400">
-        Tweet not found
+      <div className="min-h-screen pt-28 max-w-2xl mx-auto text-center text-gray-400">
+        Discussion not found
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto mt-20 px-4">
+    <div className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:pl-20 max-w-3xl mx-auto">
       <Link
         to="/tweets"
         className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-6 transition"

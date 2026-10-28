@@ -165,8 +165,20 @@ const getVideoComments = asyncHandler(async (req, res) => {
         "ownerInfo.avatar": 1,
         "ownerInfo._id": 1,
         "ownerInfo.fullname": 1,
-        likesCount: { $size: "$likesData" },
-        isLiked: currentUserId ? { $in: [currentUserId, "$likesData.likedBy"] } : false,
+        likesCount: {
+          $max: [
+            { $size: "$likesData" },
+            { $size: { $ifNull: ["$likes", []] } }
+          ]
+        },
+        isLiked: currentUserId
+          ? {
+              $or: [
+                { $in: [currentUserId, "$likesData.likedBy"] },
+                { $in: [currentUserId, { $ifNull: ["$likes", []] }] }
+              ]
+            }
+          : false,
         replies: 1
       },
     },

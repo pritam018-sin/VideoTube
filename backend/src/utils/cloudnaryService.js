@@ -1,5 +1,5 @@
-import {v2 as cloudinary} from "cloudinary";
-import fs from "fs";   
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -10,25 +10,33 @@ cloudinary.config({
     secure: true
 });
 
+const safeUnlink = (filePath) => {
+    try {
+        if (filePath && fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    } catch (err) {
+        console.error("Error removing local file:", err?.message);
+    }
+};
+
 const cloudinaryUpload = async (localFilePath) => {
     try {
         if (!localFilePath) throw new Error("No file path provided");
-        // console.log("Uploading file to Cloudinary:", localFilePath);
 
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto",
             folder: "my-app",
-        })
-    
-        
-        //file has been uploaded successfully
-        // console.log("File uploaded successfully:" , response.url); 
-        fs.unlinkSync(localFilePath); //remove the locally saved temporary file
+            timeout: 120000
+        });
+
+        safeUnlink(localFilePath);
         return response;
     } catch (error) {
-        fs.unlinkSync(localFilePath); //removed the locally saved temporay file as the upload got failed
-        return null
+        console.error("Cloudinary upload failed:", error?.message || error);
+        safeUnlink(localFilePath);
+        return null;
     }
-}
+};
 
-export {cloudinaryUpload };
+export { cloudinaryUpload };

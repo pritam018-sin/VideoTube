@@ -8,9 +8,14 @@ const tweetSchema = new mongoose.Schema({
     content: {
         type: String,
         required: true
-    }
-
-}, { timestamps: true })
+    },
+    likes: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User'
+        }
+    ]
+}, { timestamps: true });
 
 const Tweet = mongoose.model('Tweet', tweetSchema);
 

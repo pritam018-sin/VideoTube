@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyJWT } from "../middlewares/auth.Middleware.js";
+import { verifyJWT, optionalJWT } from "../middlewares/auth.Middleware.js";
 import {
     addComment,
     deleteComment,
@@ -7,7 +7,6 @@ import {
     updateComment
 } from "../controllers/comment.Controller.js";
 import { toggleLike } from "../controllers/toggleLike.Controller.js";
-import { Comment } from "../models/comment.Model.js";
 
 const router = Router();
 
@@ -24,11 +23,20 @@ router.route("/:videoId/comments/:commentId").put(
     updateComment
 );
 router.route("/:videoId/video-comments").get(
-    verifyJWT,
+    optionalJWT,
     getVideoComments
 );
 router.route("/:commentId/like").post(
     verifyJWT,
     toggleLike("comment")
 );
+router.route("/like/:commentId").post(
+    verifyJWT,
+    toggleLike("comment")
+);
+router.route("/:id/like").post(
+    verifyJWT,
+    toggleLike("comment")
+);
+
 export default router;

@@ -48,7 +48,7 @@ const TweetItem = ({ tweet, refetch }) => {
   };
 
   const handleShare = () => {
-    const url = `${window.location.origin}/tweet/${tweet._id}`;
+    const url = `${window.location.origin}/tweets/${tweet._id}`;
     navigator.clipboard.writeText(url);
     toast.success("Tweet link copied to clipboard!");
   };

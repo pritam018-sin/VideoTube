@@ -5,7 +5,10 @@ export const commentApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getVideoComments: builder.query({
       query: (videoId) => `${COMMENTS_URL}/${videoId}/video-comments`,
-      providesTags: (result, error, videoId) => [{ type: "Comment", id: videoId }],
+      providesTags: (result, error, videoId) => [
+        { type: "Comment", id: videoId },
+        "Comment"
+      ],
     }),
     addComment: builder.mutation({
       query: ({ videoId, content, parentComment }) => ({

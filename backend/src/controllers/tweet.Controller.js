@@ -2,6 +2,7 @@ import { Tweet } from "../models/tweet.Model.js";
 import { asyncHandler } from '../utils/asyncHandler.js';
 import ApiError from '../utils/apiError.js';
 import { ApiResponse } from '../utils/apiResponse.js';
+import { ensureHttps } from '../utils/ensureHttps.js';
 import mongoose from "mongoose";
 
 const createTweet = asyncHandler(async (req, res) => {
@@ -86,6 +87,14 @@ const deleteTweet = asyncHandler(async (req, res) => {
         );
 });
 
+const sanitizeTweet = (tweet) => {
+    if (!tweet) return tweet;
+    if (tweet.owner?.avatar) {
+        tweet.owner.avatar = ensureHttps(tweet.owner.avatar);
+    }
+    return tweet;
+};
+
 const getUserTweets = asyncHandler(async (req, res) => {
     const userId = req.params.userId;
     const currentUserId = req.user?._id ? new mongoose.Types.ObjectId(req.user._id) : null;
@@ -118,8 +127,20 @@ const getUserTweets = asyncHandler(async (req, res) => {
                 "owner.username": 1,
                 "owner.fullname": 1,
                 "owner.avatar": 1,
-                likesCount: { $size: "$likesData" },
-                isLiked: currentUserId ? { $in: [currentUserId, "$likesData.likedBy"] } : false
+                likesCount: {
+                    $max: [
+                        { $size: "$likesData" },
+                        { $size: { $ifNull: ["$likes", []] } }
+                    ]
+                },
+                isLiked: currentUserId
+                    ? {
+                        $or: [
+                            { $in: [currentUserId, "$likesData.likedBy"] },
+                            { $in: [currentUserId, { $ifNull: ["$likes", []] }] }
+                        ]
+                    }
+                    : false
             }
         }
     ]);
@@ -130,7 +151,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 "User tweets fetched successfully",
-                tweets
+                (tweets || []).map(sanitizeTweet)
             )
         );
 });
@@ -166,8 +187,20 @@ const getTweet = asyncHandler(async (req, res) => {
                 "owner.username": 1,
                 "owner.fullname": 1,
                 "owner.avatar": 1,
-                likesCount: { $size: "$likesData" },
-                isLiked: currentUserId ? { $in: [currentUserId, "$likesData.likedBy"] } : false
+                likesCount: {
+                    $max: [
+                        { $size: "$likesData" },
+                        { $size: { $ifNull: ["$likes", []] } }
+                    ]
+                },
+                isLiked: currentUserId
+                    ? {
+                        $or: [
+                            { $in: [currentUserId, "$likesData.likedBy"] },
+                            { $in: [currentUserId, { $ifNull: ["$likes", []] }] }
+                        ]
+                    }
+                    : false
             }
         }
     ]);
@@ -182,7 +215,7 @@ const getTweet = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 "Tweet fetched successfully",
-                tweet[0]
+                sanitizeTweet(tweet[0])
             )
         );
 });
@@ -218,8 +251,20 @@ const getAllTweets = asyncHandler(async (req, res) => {
                 "owner.username": 1,
                 "owner.fullname": 1,
                 "owner.avatar": 1,
-                likesCount: { $size: "$likesData" },
-                isLiked: currentUserId ? { $in: [currentUserId, "$likesData.likedBy"] } : false
+                likesCount: {
+                    $max: [
+                        { $size: "$likesData" },
+                        { $size: { $ifNull: ["$likes", []] } }
+                    ]
+                },
+                isLiked: currentUserId
+                    ? {
+                        $or: [
+                            { $in: [currentUserId, "$likesData.likedBy"] },
+                            { $in: [currentUserId, { $ifNull: ["$likes", []] }] }
+                        ]
+                    }
+                    : false
             }
         }
     ]);
@@ -230,7 +275,7 @@ const getAllTweets = asyncHandler(async (req, res) => {
             new ApiResponse(
                 200,
                 "All tweets fetched successfully",
-                tweets || []
+                (tweets || []).map(sanitizeTweet)
             )
         );
 });
