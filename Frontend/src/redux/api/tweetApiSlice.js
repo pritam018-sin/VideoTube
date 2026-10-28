@@ -1,6 +1,5 @@
 import { apiSlice } from "./apiSlice";
 import { TWEETS_URL } from "../constants";
-import { get } from "mongoose";
 
 export const tweetApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
