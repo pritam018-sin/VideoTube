@@ -1,7 +1,10 @@
-import React, { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useGetVideoByIdQuery } from "../redux/api/videoApiSlice.js";
+import {
+  useGetVideoByIdQuery,
+  useToggleVideoLikeMutation,
+} from "../redux/api/videoApiSlice.js";
 import {
   useGetUserChannelProfileQuery,
   useAddToWatchHistoryMutation,
@@ -10,7 +13,10 @@ import VideoDescription from "../components/VideoDescription.jsx";
 import CommentList from "../components/CommentList.jsx";
 import AddComment from "../components/AddComments.jsx";
 import Subscription from "../components/Subscription.jsx";
-import TopVideo from "../pages/Video/TopVideo.jsx"; // ✅ Import TopVideo sidebar
+import TopVideo from "../pages/Video/TopVideo.jsx";
+import PlaylistMenu from "./playlist/PlaylistMenu.jsx";
+import { ThumbsUp, Share2, Bookmark, Settings } from "lucide-react";
+import { toast } from "react-toastify";
 
 const WatchPage = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -28,6 +34,10 @@ const WatchPage = () => {
   );
 
   const [addToWatchHistory] = useAddToWatchHistoryMutation();
+  const [toggleLike, { isLoading: isLiking }] = useToggleVideoLikeMutation();
+
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
 
   useEffect(() => {
     if (videoId) {
@@ -35,52 +45,150 @@ const WatchPage = () => {
     }
   }, [videoId, addToWatchHistory]);
 
-  if (isLoading) return <p className="text-gray-400">Loading video...</p>;
-  if (error) return <p className="text-red-500">Error loading video.</p>;
-  if (!video) return <p className="text-gray-400">Video not found</p>;
+  useEffect(() => {
+    if (video) {
+      setIsLiked(!!video.isLiked);
+      setLikesCount(video.likesCount || 0);
+    }
+  }, [video]);
+
+  const handleLike = async () => {
+    if (!userInfo) {
+      toast.info("Please login to like this video");
+      return;
+    }
+    const prevLiked = isLiked;
+    const prevCount = likesCount;
+
+    setIsLiked(!prevLiked);
+    setLikesCount(prevLiked ? Math.max(0, prevCount - 1) : prevCount + 1);
+
+    try {
+      const res = await toggleLike(videoId).unwrap();
+      if (res?.data) {
+        setIsLiked(res.data.isLiked);
+        setLikesCount(res.data.likesCount);
+      }
+    } catch (err) {
+      setIsLiked(prevLiked);
+      setLikesCount(prevCount);
+      toast.error(err?.data?.message || "Failed to like video");
+    }
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Video link copied to clipboard!");
+  };
+
+  if (isLoading) return <p className="text-gray-400 p-8 text-center">Loading video...</p>;
+  if (error) return <p className="text-red-500 p-8 text-center">Error loading video.</p>;
+  if (!video) return <p className="text-gray-400 p-8 text-center">Video not found</p>;
 
   const handleClickChannel = () => {
     navigate(`/user-channel/${video.owner?.username}`);
   };
 
+  const isOwner =
+    userInfo &&
+    (userInfo._id === video?.owner?._id || userInfo._id === video?.owner);
+
   return (
-    <div className="ml-10 mt-20 max-w-7xl mx-auto flex gap-6 px-4 text-white">
+    <div className="ml-10 mt-20 max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 px-4 text-white">
       {/* LEFT SECTION (Main Video + Details) */}
       <div className="flex-1">
         {/* Video Player */}
-        <div className="relative aspect-video w-full border border-gray-700 rounded-lg overflow-hidden shadow-lg">
-          <video src={video.videoFile} controls className="w-full h-full" />
+        <div className="relative aspect-video w-full bg-black border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+          <video
+            src={video.videoFile}
+            controls
+            className="w-full h-full object-contain"
+          />
         </div>
 
-        {/* Title + Info */}
-        <h1 className="mt-4 text-2xl font-bold">{video.title}</h1>
+        {/* Title */}
+        <h1 className="mt-4 text-2xl font-bold tracking-tight text-white">
+          {video.title}
+        </h1>
 
-        {/* Stats */}
-        <div className="flex gap-6 mt-3 text-sm text-gray-500">
-          <span>{video.views} views</span>
-          <span>{new Date(video.createdAt).toLocaleDateString()}</span>
+        {/* Action Bar (Views, Likes, Share, Playlist) */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mt-3 pb-4 border-b border-white/10">
+          <div className="text-sm text-gray-400">
+            <span>{video.views || 0} views</span> ·{" "}
+            <span>{new Date(video.createdAt).toLocaleDateString()}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Like Button */}
+            <button
+              onClick={handleLike}
+              disabled={isLiking}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition duration-200 cursor-pointer ${
+                isLiked
+                  ? "bg-red-500/20 text-red-500 border border-red-500/30"
+                  : "bg-white/10 hover:bg-white/20 text-white"
+              }`}
+            >
+              <ThumbsUp
+                className={`w-4 h-4 ${isLiked ? "fill-red-500" : ""}`}
+              />
+              <span>{likesCount}</span>
+            </button>
+
+            {/* Share Button */}
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition cursor-pointer"
+            >
+              <Share2 className="w-4 h-4" />
+              <span>Share</span>
+            </button>
+
+            {/* Save to Playlist */}
+            <PlaylistMenu
+              userId={userInfo?._id}
+              videoId={videoId}
+              customTrigger={
+                <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition cursor-pointer">
+                  <Bookmark className="w-4 h-4" />
+                  <span>Save</span>
+                </button>
+              }
+            />
+
+            {/* Owner Manage Button */}
+            {isOwner && (
+              <Link
+                to="/dashboard"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/30 text-yellow-400 text-sm font-medium transition"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Manage</span>
+              </Link>
+            )}
+          </div>
         </div>
 
-        {/* Description */}
-        <VideoDescription description={video.description} />
-
-        {/* Channel Info */}
-        <div className="flex items-center justify-between max-w-3xl mt-6">
+        {/* Channel Info & Subscribe */}
+        <div className="flex items-center justify-between mt-5 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
           <div
-            className="flex items-center gap-3 mt-4 p-2 rounded-md group cursor-pointer w-fit hover:bg-gray-900/20 transition-colors duration-300"
+            className="flex items-center gap-3 group cursor-pointer"
             onClick={handleClickChannel}
           >
             <img
-              src={video.owner?.avatar}
+              src={video.owner?.avatar || "https://via.placeholder.com/150"}
               alt={video.owner?.username}
-              className="w-10 h-10 rounded-full transition-transform duration-300 group-hover:scale-105"
+              className="w-12 h-12 rounded-full object-cover ring-2 ring-white/10 group-hover:ring-red-500 transition duration-300"
             />
-            <span className="text-sm font-medium text-white transition-colors duration-300 group-hover:text-red-500">
-              {video.owner?.fullname}
-            </span>
-            <span className="text-sm text-gray-500">
-              · {channelData?.data?.subscribersCount || 0} subscribers
-            </span>
+            <div>
+              <span className="text-base font-semibold text-white group-hover:text-red-400 transition">
+                {video.owner?.fullname || video.owner?.username}
+              </span>
+              <p className="text-xs text-gray-400">
+                @{video.owner?.username} ·{" "}
+                {channelData?.data?.subscribersCount || 0} subscribers
+              </p>
+            </div>
           </div>
           <Subscription
             channelId={video.owner?._id}
@@ -88,16 +196,21 @@ const WatchPage = () => {
           />
         </div>
 
+        {/* Description */}
+        <div className="mt-4">
+          <VideoDescription description={video.description} />
+        </div>
+
         {/* Comments */}
-        <div>
-          <h2 className="mt-6 text-xl font-semibold">Comments Section</h2>
+        <div className="mt-8">
+          <h2 className="text-xl font-bold text-white mb-4">Comments</h2>
           <AddComment videoId={videoId} />
           <CommentList videoId={videoId} currentUserId={userInfo?._id} />
         </div>
       </div>
 
       {/* RIGHT SECTION (Top Videos Sidebar) */}
-      <div className="w-[350px] space-y-4">
+      <div className="w-full lg:w-[360px] space-y-4">
         <TopVideo />
       </div>
     </div>

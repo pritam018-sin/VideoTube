@@ -72,7 +72,13 @@ export const videoApiSlice = apiSlice.injectEndpoints({
       query: () => `${VIDEOS_URL}/top`,
       method: "GET"
     }),
-    
+    toggleVideoLike: builder.mutation({
+      query: (videoId) => ({
+        url: `${VIDEOS_URL}/${videoId}/like`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Video"],
+    }),
   }),
 });
 
@@ -88,4 +94,5 @@ export const {
   useGetMyVideosQuery,
   useSearchVideosQuery,
   useTopVideosQuery,
+  useToggleVideoLikeMutation,
 } = videoApiSlice;

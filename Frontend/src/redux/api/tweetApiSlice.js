@@ -43,6 +43,14 @@ export const tweetApiSlice = apiSlice.injectEndpoints({
         url: `${TWEETS_URL}/delete-tweet/${tweetId}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Tweet"],
+    }),
+    toggleTweetLike: builder.mutation({
+      query: (tweetId) => ({
+        url: `${TWEETS_URL}/${tweetId}/like`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Tweet"],
     }),
   }),
 });
@@ -54,4 +62,5 @@ export const {
   useGetTweetQuery,
   useUpdateTweetMutation,
   useDeleteTweetMutation,
+  useToggleTweetLikeMutation,
 } = tweetApiSlice;

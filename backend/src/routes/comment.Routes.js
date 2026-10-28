@@ -29,6 +29,6 @@ router.route("/:videoId/video-comments").get(
 );
 router.route("/:commentId/like").post(
     verifyJWT,
-    toggleLike(Comment)
+    toggleLike("comment")
 );
 export default router;

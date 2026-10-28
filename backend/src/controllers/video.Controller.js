@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js";
 import { Video } from "../models/video.Model.js";
 import { Comment } from "../models/comment.Model.js";
+import { Like } from "../models/like.Model.js";
 import { cloudinaryUpload } from "../utils/cloudnaryService.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 
@@ -50,77 +51,74 @@ const updateVideo = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
-  const updatedVideo = await Video.findByIdAndUpdate(
-    req.params.id,
-    {
-      $set: {
-        title: title.trim(),
-        description: description.trim(),
-        isPublished: isPublished ?? false,
-      },
-    },
-    { new: true, runValidators: true } // new:true -> updated doc return karega
-  );
-
-  if (!updatedVideo) {
+  const video = await Video.findById(req.params.id);
+  if (!video) {
     throw new ApiError(404, "Video not found");
   }
 
+  if (video.owner.toString() !== req.user?._id.toString()) {
+    throw new ApiError(403, "You are not authorized to update this video");
+  }
+
+  video.title = title.trim();
+  video.description = description.trim();
+  if (isPublished !== undefined) video.isPublished = isPublished;
+  await video.save();
+
   res
     .status(200)
-    .json(new ApiResponse(200, "Video updated successfully", updatedVideo));
+    .json(new ApiResponse(200, "Video updated successfully", video));
 });
+
 const updateVideoThumbnail = asyncHandler(async (req, res) => {
-  // Multer single file => req.file
   const thumbnailLocalPath = req.file?.path;
 
   if (!thumbnailLocalPath) {
     throw new ApiError(400, "Thumbnail file is required");
   }
 
-  // Upload to Cloudinary
-  const thumbnail = await cloudinaryUpload(thumbnailLocalPath);
-
-  if (!thumbnail) {
-    throw new ApiError(400, "Thumbnail upload failed");
-  }
-
-  // Update video thumbnail in DB
-  const video = await Video.findByIdAndUpdate(
-    req.params.id, // video id from URL
-    { $set: { thumbnail: thumbnail.secure_url || thumbnail.url } },
-    { new: true }
-  );
-
+  const video = await Video.findById(req.params.id);
   if (!video) {
     throw new ApiError(404, "Video not found");
   }
 
+  if (video.owner.toString() !== req.user?._id.toString()) {
+    throw new ApiError(403, "You are not authorized to update this video");
+  }
+
+  // Upload to Cloudinary
+  const thumbnail = await cloudinaryUpload(thumbnailLocalPath);
+  if (!thumbnail) {
+    throw new ApiError(400, "Thumbnail upload failed");
+  }
+
+  video.thumbnail = thumbnail.secure_url || thumbnail.url;
+  await video.save();
+
   return res
     .status(200)
-    .json(new ApiResponse(200, video, "Thumbnail updated successfully"));
+    .json(new ApiResponse(200, "Thumbnail updated successfully", video));
 });
 
 const togglePublish = asyncHandler(async (req, res) => {
-  const videoId = req.params.id; // tumne routes me :id use kiya tha
+  const videoId = req.params.id;
 
-  // Find video
   const video = await Video.findById(videoId);
   if (!video) {
     throw new ApiError(404, "Video not found");
   }
 
-  // Toggle publish status
-  const updatedVideo = await Video.findByIdAndUpdate(
-    videoId,
-    { $set: { isPublished: !video.isPublished } },
-    { new: true }
-  );
+  if (video.owner.toString() !== req.user?._id.toString()) {
+    throw new ApiError(403, "You are not authorized to change publish status of this video");
+  }
+
+  video.isPublished = !video.isPublished;
+  await video.save();
 
   return res
     .status(200)
     .json(
-      new ApiResponse(200, updatedVideo, "Publish status updated successfully")
+      new ApiResponse(200, "Publish status updated successfully", video)
     );
 });
 
@@ -167,20 +165,29 @@ const getVideoById = asyncHandler(async (req, res) => {
     .populate({
       path: "comments",
       populate: { path: "owner", select: "fullname avatar username" },
-    })
-    .populate("likes", "username avatar fullname");
+    });
 
   if (!video) {
     return res.status(404).json(new ApiResponse(404, null, "Video not found"));
   }
 
   // auto-increase view count
-  video.views += 1;
+  video.views = (video.views || 0) + 1;
   await video.save();
+
+  // Aggregate likes from Like collection
+  const likesCount = await Like.countDocuments({ video: videoId });
+  const isLiked = req.user
+    ? !!(await Like.findOne({ video: videoId, likedBy: req.user._id }))
+    : false;
+
+  const videoData = video.toObject();
+  videoData.likesCount = likesCount;
+  videoData.isLiked = isLiked;
 
   res
     .status(200)
-    .json(new ApiResponse(200, "Video fetched successfully", video));
+    .json(new ApiResponse(200, "Video fetched successfully", videoData));
 });
 
 const getUserVideos = asyncHandler(async (req, res) => {

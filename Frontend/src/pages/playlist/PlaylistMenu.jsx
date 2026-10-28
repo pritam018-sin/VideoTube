@@ -7,7 +7,7 @@ import {
   useAddVideoToPlaylistMutation,
 } from "../../redux/api/playlistApiSlice";
 
-const PlaylistMenu = ({ userId, videoId }) => {
+const PlaylistMenu = ({ userId, videoId, customTrigger }) => {
   const [open, setOpen] = useState(false);
 
   const { data: playlistsData, isLoading } = useGetUserAllPlaylistQuery(userId, {
@@ -16,9 +16,15 @@ const PlaylistMenu = ({ userId, videoId }) => {
   const [addVideoToPlaylist] = useAddVideoToPlaylistMutation();
 
   const playlists = playlistsData?.data?.playlists || [];
-  console.log("Playlists:", playlists);
-  console.log("Video ID:", videoId);
-  console.log("User ID:", userId);
+
+  const handleToggle = () => {
+    if (!userId) {
+      toast.info("Please login to save video to playlist");
+      return;
+    }
+    setOpen((prev) => !prev);
+  };
+
   // ✅ Handle add video
   const handleAddToPlaylist = async (playlistId) => {
     try {
@@ -36,13 +42,18 @@ const PlaylistMenu = ({ userId, videoId }) => {
 
   return (
     <div className="relative inline-block text-left">
-      {/* 3-dot button */}
-      <button
-        onClick={() => setOpen((prev) => !prev)}
-        className="p-2 rounded-full hover:bg-gray-700 text-gray-300"
-      >
-        <MoreVertical size={20} />
-      </button>
+      {customTrigger ? (
+        <div onClick={handleToggle} className="cursor-pointer">
+          {customTrigger}
+        </div>
+      ) : (
+        <button
+          onClick={handleToggle}
+          className="p-2 rounded-full hover:bg-white/10 text-gray-300 hover:text-white transition"
+        >
+          <MoreVertical size={20} />
+        </button>
+      )}
 
       {/* Dropdown menu → directly playlists */}
       <AnimatePresence>

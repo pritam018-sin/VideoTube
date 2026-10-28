@@ -1,5 +1,5 @@
 import {Router} from 'express';
-import { verifyJWT } from '../middlewares/auth.Middleware.js';
+import { verifyJWT, optionalJWT } from '../middlewares/auth.Middleware.js';
 import { upload } from '../middlewares/mutler.Middleware.js';
 import { 
         deleteVideo,
@@ -52,7 +52,7 @@ router.route("/delete-video/:id").delete(
 router.route("/search").get(searchVideos);
 router.route("/top").get(getTopVideos);
 router.route("/all-videos").get(getAllVideos);
-router.route("/:id").get(getVideoById);
+router.route("/:id").get(optionalJWT, getVideoById);
 router.route("/:id/like").post(verifyJWT, toggleLike("video"));
 
 router.route("/user-videos/:id").get(getUserVideos);

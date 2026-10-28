@@ -85,12 +85,12 @@ const UserDashboard = () => {
         🎬 My Dashboard
       </h2>
 
-      {videos.data?.length === 0 && (
+      {videos?.data?.length === 0 && (
         <p className="text-center text-gray-400">No videos uploaded yet.</p>
       )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {videos.data?.map((video) => (
+        {(videos?.data || []).map((video) => (
           <div
             key={video._id}
             className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-lg p-5 hover:scale-[1.02] transition-transform duration-300"

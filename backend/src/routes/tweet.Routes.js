@@ -8,13 +8,16 @@ import {
     getUserTweets,
     updateTweet
  } from "../controllers/tweet.Controller.js";
+import { toggleLike } from "../controllers/toggleLike.Controller.js";
 
 const router = Router();
 
-router.route('/create-tweet').post(verifyJWT, createTweet)
-router.route('/update-tweet/:tweetId').put(verifyJWT, updateTweet)   
-router.route('/delete-tweet/:tweetId').delete(verifyJWT, deleteTweet)  
-router.route('/user-tweets/:userId').get(verifyJWT, getUserTweets)
-router.route('/all-tweets').get(verifyJWT, getAllTweets)
-router.route('/:id').get(verifyJWT, getTweet)
+router.route('/create-tweet').post(verifyJWT, createTweet);
+router.route('/update-tweet/:tweetId').put(verifyJWT, updateTweet);   
+router.route('/delete-tweet/:tweetId').delete(verifyJWT, deleteTweet);  
+router.route('/user-tweets/:userId').get(verifyJWT, getUserTweets);
+router.route('/all-tweets').get(verifyJWT, getAllTweets);
+router.route('/:id').get(verifyJWT, getTweet);
+router.route('/:id/like').post(verifyJWT, toggleLike("tweet"));
+
 export default router;

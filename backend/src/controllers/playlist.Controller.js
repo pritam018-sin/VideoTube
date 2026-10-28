@@ -43,46 +43,50 @@ const updatePlayList = asyncHandler(async (req, res) => {
         throw new ApiError("Playlist name is required", 400);
     }
 
-    const updatedPlayList = await PlayList.findByIdAndUpdate(
-        req.params?.playlistId,
-        {
-            $set: {
-                name,
-                description
-            }
-        },
-        { new: true }
-    ).populate("owner", "username email avatar");
+    const playlist = await PlayList.findById(req.params?.playlistId);
+    if (!playlist) {
+        throw new ApiError(404, "Playlist not found");
+    }
+
+    if (playlist.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You are not authorized to update this playlist");
+    }
+
+    playlist.name = name.trim();
+    if (description !== undefined) playlist.description = description.trim();
+    await playlist.save();
 
     return res
         .status(200)
         .json(
             new ApiResponse(
                 200,
-                {
-                    updatedPlayList
-                },
-                "Playlist updated successfully"
+                "Playlist updated successfully",
+                { updatedPlayList: playlist }
             )
         );
 });
 
 //delete Playlist
 const deletePlayList = asyncHandler(async (req, res) => {
-    const deletedPlayList = await PlayList.findByIdAndDelete(req.params?.playlistId);
-    if (!deletedPlayList) {
-        throw new ApiError("Playlist not found", 404);
+    const playlist = await PlayList.findById(req.params?.playlistId);
+    if (!playlist) {
+        throw new ApiError(404, "Playlist not found");
     }
+
+    if (playlist.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You are not authorized to delete this playlist");
+    }
+
+    await playlist.deleteOne();
 
     return res
         .status(200)
         .json(
             new ApiResponse(
                 200,
-                {
-                    deletedPlayList
-                },
-                "Playlist deleted successfully"
+                "Playlist deleted successfully",
+                null
             )
         );
 });
@@ -91,18 +95,20 @@ const deletePlayList = asyncHandler(async (req, res) => {
 const addVideoToPlayList = asyncHandler(async (req, res) => {
    const { playlistId, videoId } = req.params;
 
-     // check video exist
-  const video = await Video.findById(videoId);
-
+   const video = await Video.findById(videoId);
     if (!video) {
-        throw new ApiError("Video not found", 404);
+        throw new ApiError(404, "Video not found");
     }
 
     const playlist = await PlayList.findById(playlistId);
-
-    if(!playlist){
-        throw new ApiError("Playlist not found", 403);
+    if (!playlist) {
+        throw new ApiError(404, "Playlist not found");
     }
+
+    if (playlist.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You are not authorized to modify this playlist");
+    }
+
     const updatedPlayList = await PlayList.findByIdAndUpdate(
         playlistId,
         {
@@ -118,10 +124,8 @@ const addVideoToPlayList = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                {
-                    updatedPlayList
-                },
-                "Video added to playlist successfully"
+                "Video added to playlist successfully",
+                { updatedPlayList }
             )
         );
 });
@@ -131,15 +135,17 @@ const removeVideoFromPlayList = asyncHandler(async (req, res) => {
     const { playlistId, videoId } = req.params;
 
     const video = await Video.findById(videoId);
-
     if (!video) {
-        throw new ApiError("Video not found", 404);
+        throw new ApiError(404, "Video not found");
     }
 
     const playlist = await PlayList.findById(playlistId);
-
     if (!playlist) {
-        throw new ApiError("Playlist not found", 403);
+        throw new ApiError(404, "Playlist not found");
+    }
+
+    if (playlist.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You are not authorized to modify this playlist");
     }
 
     const updatedPlayList = await PlayList.findByIdAndUpdate(

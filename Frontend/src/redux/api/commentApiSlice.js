@@ -8,10 +8,10 @@ export const commentApiSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, videoId) => [{ type: "Comment", id: videoId }],
     }),
     addComment: builder.mutation({
-      query: ({ videoId, content }) => ({
+      query: ({ videoId, content, parentComment }) => ({
         url: `${COMMENTS_URL}/${videoId}/comment`,
         method: "POST",
-        body: { content },
+        body: { content, parentComment },
       }),
       invalidatesTags: (result, error, { videoId }) => [
         { type: "Comment", id: videoId },
@@ -34,6 +34,13 @@ export const commentApiSlice = apiSlice.injectEndpoints({
         { type: "Comment", id: videoId },
       ],
     }),
+    toggleCommentLike: builder.mutation({
+      query: (commentId) => ({
+        url: `${COMMENTS_URL}/${commentId}/like`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Comment"],
+    }),
   }),
 });
 
@@ -42,4 +49,5 @@ export const {
   useAddCommentMutation,
   useUpdateCommentMutation,
   useDeleteCommentMutation,
+  useToggleCommentLikeMutation,
 } = commentApiSlice;
