@@ -7,9 +7,15 @@ let refreshTokenFromStorage = null;
 
 try {
   const raw = localStorage.getItem("userInfo");
-  if (raw && raw !== "undefined") userInfoFromStorage = JSON.parse(raw);
   accessTokenFromStorage = localStorage.getItem("accessToken") || null;
   refreshTokenFromStorage = localStorage.getItem("refreshToken") || null;
+
+  if (raw && raw !== "undefined" && (accessTokenFromStorage || refreshTokenFromStorage)) {
+    userInfoFromStorage = JSON.parse(raw);
+  } else {
+    userInfoFromStorage = null;
+    localStorage.removeItem("userInfo");
+  }
 } catch (err) {
   userInfoFromStorage = null;
   accessTokenFromStorage = null;

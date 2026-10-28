@@ -3,6 +3,7 @@ import { Video } from "../models/video.Model.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import ApiError from '../utils/apiError.js';
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { ensureHttps } from "../utils/ensureHttps.js";
 import mongoose from "mongoose";
 
 const addComment = asyncHandler(async (req, res) => {
@@ -171,9 +172,19 @@ const getVideoComments = asyncHandler(async (req, res) => {
     },
   ]);
 
+  const sanitizedComments = comments.map((c) => {
+    if (c.ownerInfo?.avatar) c.ownerInfo.avatar = ensureHttps(c.ownerInfo.avatar);
+    if (Array.isArray(c.replies)) {
+      c.replies.forEach((r) => {
+        if (r.ownerInfo?.avatar) r.ownerInfo.avatar = ensureHttps(r.ownerInfo.avatar);
+      });
+    }
+    return c;
+  });
+
   res
     .status(200)
-    .json(new ApiResponse(200, "Comments fetched successfully", comments));
+    .json(new ApiResponse(200, "Comments fetched successfully", sanitizedComments));
 });
 
 export {

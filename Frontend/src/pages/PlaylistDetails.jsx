@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useGetSinglePlaylistQuery } from "../redux/api/playlistApiSlice";
 import { formatDuration } from "../utils/formatDuration.js";
 import { format } from "timeago.js";
+import { ensureHttps } from "../utils/url.js";
 
 const PlaylistDetails = () => {
   const { playlistId } = useParams();
@@ -25,9 +26,9 @@ const PlaylistDetails = () => {
         <div className="flex items-center gap-3 mb-6">
           <Link to={`/user-channel/${playlist.owner.username}`}>
             <img
-              src={playlist.owner.avatar}
+              src={ensureHttps(playlist.owner.avatar) || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
               alt={playlist.owner.username}
-              className="w-10 h-10 rounded-full"
+              className="w-10 h-10 rounded-full object-cover ring-1 ring-white/10"
             />
           </Link>
           <Link to={`/user-channel/${playlist.owner.username}`}>
@@ -53,7 +54,7 @@ const PlaylistDetails = () => {
               {/* Thumbnail with duration */}
               <div className="relative w-52 flex-shrink-0">
                 <img
-                  src={video.thumbnail}
+                  src={ensureHttps(video.thumbnail)}
                   alt={video.title}
                   className="w-full h-28 object-cover rounded-md"
                 />

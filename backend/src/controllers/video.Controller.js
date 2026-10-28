@@ -5,6 +5,7 @@ import { Comment } from "../models/comment.Model.js";
 import { Like } from "../models/like.Model.js";
 import { cloudinaryUpload } from "../utils/cloudnaryService.js";
 import { ApiResponse } from "../utils/apiResponse.js";
+import { ensureHttps } from "../utils/ensureHttps.js";
 
 const uploadContent = asyncHandler(async (req, res) => {
   const { title, description, isPublished } = req.body;
@@ -155,7 +156,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
   }
   res
     .status(200)
-    .json(new ApiResponse(200, "All videos fetched successfully", videos));
+    .json(new ApiResponse(200, "All videos fetched successfully", videos.map(sanitizeVideo)));
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
@@ -171,24 +172,51 @@ const getVideoById = asyncHandler(async (req, res) => {
     return res.status(404).json(new ApiResponse(404, null, "Video not found"));
   }
 
-  // auto-increase view count
-  video.views = (video.views || 0) + 1;
-  await video.save();
+  // Atomic view increment (avoids validation errors on populated subdocuments)
+  await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
 
-  // Aggregate likes from Like collection
-  const likesCount = await Like.countDocuments({ video: videoId });
-  const isLiked = req.user
+  // Aggregate likes from Like collection and video.likes array for 100% accuracy
+  const countFromCollection = await Like.countDocuments({ video: videoId });
+  const countFromArray = video.likes?.length || 0;
+  const likesCount = Math.max(countFromCollection, countFromArray);
+
+  const isLikedInCollection = req.user
     ? !!(await Like.findOne({ video: videoId, likedBy: req.user._id }))
     : false;
+  const isLikedInArray =
+    req.user && Array.isArray(video.likes)
+      ? video.likes.some((uid) => uid.toString() === req.user._id.toString())
+      : false;
+  const isLiked = isLikedInCollection || isLikedInArray;
 
   const videoData = video.toObject();
+  videoData.views = (videoData.views || 0) + 1;
   videoData.likesCount = likesCount;
   videoData.isLiked = isLiked;
+
+  // Sanitize all URLs to HTTPS to permanently eliminate mixed content warnings
+  if (videoData.videoFile) videoData.videoFile = ensureHttps(videoData.videoFile);
+  if (videoData.thumbnail) videoData.thumbnail = ensureHttps(videoData.thumbnail);
+  if (videoData.owner?.avatar) videoData.owner.avatar = ensureHttps(videoData.owner.avatar);
+  if (videoData.comments && Array.isArray(videoData.comments)) {
+    videoData.comments.forEach((c) => {
+      if (c.owner?.avatar) c.owner.avatar = ensureHttps(c.owner.avatar);
+    });
+  }
 
   res
     .status(200)
     .json(new ApiResponse(200, "Video fetched successfully", videoData));
 });
+
+const sanitizeVideo = (v) => {
+  if (!v) return v;
+  const obj = typeof v.toObject === "function" ? v.toObject() : { ...v };
+  if (obj.videoFile) obj.videoFile = ensureHttps(obj.videoFile);
+  if (obj.thumbnail) obj.thumbnail = ensureHttps(obj.thumbnail);
+  if (obj.owner?.avatar) obj.owner.avatar = ensureHttps(obj.owner.avatar);
+  return obj;
+};
 
 const getUserVideos = asyncHandler(async (req, res) => {
   const { id } = req.params;
@@ -206,8 +234,9 @@ const getUserVideos = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, "User videos fetched successfully", userVideos));
+    .json(new ApiResponse(200, "User videos fetched successfully", userVideos.map(sanitizeVideo)));
 });
+
 const getMyVideos = asyncHandler(async (req, res) => {
   const userId = req.user._id; // login user id from auth middleware
 
@@ -218,8 +247,9 @@ const getMyVideos = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, "My videos fetched successfully", userVideos));
+    .json(new ApiResponse(200, "My videos fetched successfully", userVideos.map(sanitizeVideo)));
 });
+
 const toggleLikeVideo = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const userId = req.user._id;
@@ -249,10 +279,10 @@ const toggleLikeVideo = asyncHandler(async (req, res) => {
       )
     );
 });
+
 // GET /api/videos/search?query=keyword
 const searchVideos = asyncHandler(async (req, res) => {
   const { query } = req.query;
-  console.log(query);
   if (!query) {
     throw new ApiError(404, "Query is Required");
   }
@@ -263,8 +293,9 @@ const searchVideos = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, "My videos fetched successfully", videos));
+    .json(new ApiResponse(200, "Videos fetched successfully", videos.map(sanitizeVideo)));
 });
+
 // GET /api/videos/top
 const getTopVideos = asyncHandler(async (req, res) => {
   const videos = await Video.find()
@@ -274,7 +305,7 @@ const getTopVideos = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, "My videos fetched successfully", videos));
+    .json(new ApiResponse(200, "Top videos fetched successfully", videos.map(sanitizeVideo)));
 });
 
 export {

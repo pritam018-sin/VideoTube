@@ -2,7 +2,8 @@ import React from "react";
 import { useGetCurrentUserQuery } from "../../redux/api/userApiSlice";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { FiPenTool as Pencil } from "react-icons/fi"; 
+import { FiPenTool as Pencil } from "react-icons/fi";
+import { ensureHttps } from "../../utils/url.js"; 
 
 const UserProfile = () => {
   const { data, isLoading, error } = useGetCurrentUserQuery();
@@ -21,7 +22,7 @@ const UserProfile = () => {
       <div className="relative w-full h-60 bg-gradient-to-r from-[#1a1a1a] to-[#111111] overflow-hidden">
         {user?.coverImage ? (
           <img
-            src={user.coverImage}
+            src={ensureHttps(user.coverImage)}
             alt="Cover"
             className="w-full h-60 object-cover opacity-80"
           />
@@ -46,7 +47,10 @@ const UserProfile = () => {
         <div className="absolute -top-20 left-6">
           <motion.img
             whileHover={{ scale: 1.1 }}
-            src={user?.avatar || "https://via.placeholder.com/150"}
+            src={
+              ensureHttps(user?.avatar) ||
+              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+            }
             alt="Avatar"
             className="w-40 h-40 rounded-full border-4 border-[#0f0f0f] shadow-[0_0_20px_rgba(255,255,255,0.2)] object-cover"
           />

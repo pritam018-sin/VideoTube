@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { format } from "timeago.js";
 import { formatDuration } from "../utils/formatDuration.js";
+import { ensureHttps } from "../utils/url.js";
 
 const VideosTab = ({ userId, onAdd }) => {
   const { data, isLoading, error } = useGetUserVideosQuery(userId || "");
@@ -35,7 +36,7 @@ const VideosTab = ({ userId, onAdd }) => {
             <Link to={`/watch/${video._id}`}>
               <div className="relative">
                 <img
-                  src={video.thumbnail}
+                  src={ensureHttps(video.thumbnail)}
                   alt={video.title}
                   className="w-full h-48 object-cover border-b border-gray-700 rounded-t-lg"
                 />
@@ -50,9 +51,12 @@ const VideosTab = ({ userId, onAdd }) => {
               {/* Owner Avatar */}
               <Link to={`/user-channel/${video.owner?.username || ""}`}>
                 <img
-                  src={video.owner?.avatar}
+                  src={
+                    ensureHttps(video.owner?.avatar) ||
+                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+                  }
                   alt={video.owner?.fullname || "Owner"}
-                  className="w-10 h-10 rounded-full"
+                  className="w-10 h-10 rounded-full object-cover ring-1 ring-white/10"
                 />
               </Link>
 

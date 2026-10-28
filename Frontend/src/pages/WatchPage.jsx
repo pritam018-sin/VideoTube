@@ -17,6 +17,7 @@ import TopVideo from "../pages/Video/TopVideo.jsx";
 import PlaylistMenu from "./playlist/PlaylistMenu.jsx";
 import { ThumbsUp, Share2, Bookmark, Settings } from "lucide-react";
 import { toast } from "react-toastify";
+import { ensureHttps } from "../utils/url.js";
 
 const WatchPage = () => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -55,6 +56,7 @@ const WatchPage = () => {
   const handleLike = async () => {
     if (!userInfo) {
       toast.info("Please login to like this video");
+      navigate("/login");
       return;
     }
     const prevLiked = isLiked;
@@ -65,14 +67,27 @@ const WatchPage = () => {
 
     try {
       const res = await toggleLike(videoId).unwrap();
-      if (res?.data) {
-        setIsLiked(res.data.isLiked);
-        setLikesCount(res.data.likesCount);
-      }
+      const newIsLiked =
+        res?.data?.isLiked !== undefined
+          ? res.data.isLiked
+          : res?.isLiked !== undefined
+          ? res.isLiked
+          : !prevLiked;
+      const newLikesCount =
+        res?.data?.likesCount !== undefined
+          ? res.data.likesCount
+          : res?.likesCount !== undefined
+          ? res.likesCount
+          : prevLiked
+          ? Math.max(0, prevCount - 1)
+          : prevCount + 1;
+
+      setIsLiked(newIsLiked);
+      setLikesCount(newLikesCount);
     } catch (err) {
       setIsLiked(prevLiked);
       setLikesCount(prevCount);
-      toast.error(err?.data?.message || "Failed to like video");
+      toast.error(err?.data?.message || err?.message || "Failed to like video");
     }
   };
 
@@ -94,13 +109,13 @@ const WatchPage = () => {
     (userInfo._id === video?.owner?._id || userInfo._id === video?.owner);
 
   return (
-    <div className="ml-10 mt-20 max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 px-4 text-white">
+    <div className="min-h-screen pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 text-white">
       {/* LEFT SECTION (Main Video + Details) */}
       <div className="flex-1">
         {/* Video Player */}
-        <div className="relative aspect-video w-full bg-black border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="relative aspect-video w-full bg-black/90 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
           <video
-            src={video.videoFile}
+            src={ensureHttps(video.videoFile)}
             controls
             className="w-full h-full object-contain"
           />
@@ -176,7 +191,7 @@ const WatchPage = () => {
             onClick={handleClickChannel}
           >
             <img
-              src={video.owner?.avatar || "https://via.placeholder.com/150"}
+              src={ensureHttps(video.owner?.avatar) || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
               alt={video.owner?.username}
               className="w-12 h-12 rounded-full object-cover ring-2 ring-white/10 group-hover:ring-red-500 transition duration-300"
             />

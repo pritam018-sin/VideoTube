@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import ProfileMenu from "../../components/ProfileMenu";
 import VideoSearchPage from "../Video/VideoSearchPage";
+import { ensureHttps } from "../../utils/url.js";
 
 export default function Navbar() {
   const { userInfo } = useSelector((state) => state.auth);
@@ -39,9 +40,12 @@ export default function Navbar() {
               className="flex items-center cursor-pointer space-x-2"
             >
               <img
-                src={userInfo.avatar}
+                src={
+                  ensureHttps(userInfo.avatar) ||
+                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+                }
                 alt={userInfo.username}
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 hover:ring-red-500 transition"
               />
             </div>
 

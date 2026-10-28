@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { format } from "timeago.js";
 import { Link } from "react-router-dom";
 import { Heart, MessageSquare, CornerDownRight, Send, Trash2 } from "lucide-react";
+import { ensureHttps } from "../utils/url.js";
 
 const CommentList = ({ videoId, currentUserId }) => {
   const { data, isLoading, refetch } = useGetVideoCommentsQuery(videoId);
@@ -91,7 +92,7 @@ const CommentList = ({ videoId, currentUserId }) => {
             {/* Avatar */}
             <Link to={`/user-channel/${c.ownerInfo?.username}`}>
               <img
-                src={c.ownerInfo?.avatar || "https://via.placeholder.com/150"}
+                src={ensureHttps(c.ownerInfo?.avatar) || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
                 alt="avatar"
                 className="w-10 h-10 rounded-full object-cover ring-1 ring-white/10 hover:ring-red-500 transition"
               />
@@ -239,7 +240,7 @@ const CommentList = ({ videoId, currentUserId }) => {
                     <div key={reply._id} className="flex items-start gap-2.5 group/reply">
                       <Link to={`/user-channel/${reply.ownerInfo?.username}`}>
                         <img
-                          src={reply.ownerInfo?.avatar || "https://via.placeholder.com/150"}
+                          src={ensureHttps(reply.ownerInfo?.avatar) || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
                           alt="avatar"
                           className="w-7 h-7 rounded-full object-cover ring-1 ring-white/10"
                         />

@@ -11,6 +11,7 @@ export const videoApiSlice = apiSlice.injectEndpoints({
     }),
     getVideoById: builder.query({
       query: (videoId) => `${VIDEOS_URL}/${videoId}`,
+      providesTags: (result, error, videoId) => [{ type: "Video", id: videoId }],
     }),
     uploadVideo: builder.mutation({
       query: (formData) => ({
@@ -77,7 +78,7 @@ export const videoApiSlice = apiSlice.injectEndpoints({
         url: `${VIDEOS_URL}/${videoId}/like`,
         method: "POST",
       }),
-      invalidatesTags: ["Video"],
+      invalidatesTags: (result, error, videoId) => [{ type: "Video", id: videoId }],
     }),
   }),
 });

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { FaUserPlus, FaUserMinus } from "react-icons/fa";
 import Button from "../../components/Button.jsx";
 import Subscription from "../../components/Subscription.jsx";
+import { ensureHttps } from "../../utils/url.js";
 
 // Tabs Components
 import VideosTab from "../../components/VideosTab.jsx";
@@ -30,7 +31,7 @@ const UserChannel = () => {
       <div className="relative w-full h-52 md:h-72 rounded-b-2xl shadow-lg">
         {channel?.coverImage ? (
           <img
-            src={channel.coverImage}
+            src={ensureHttps(channel.coverImage)}
             alt={channel.fullname}
             className="pl-10 w-[95%] mx-auto h-full object-cover rounded-2xl rounded-l-2xl shadow-lg"
           />
@@ -43,7 +44,10 @@ const UserChannel = () => {
       <div className="max-w-6xl mx-auto px-6 -mt-16 flex flex-col md:flex-row items-center md:items-end gap-6">
         {/* Avatar */}
         <motion.img
-          src={channel?.avatar}
+          src={
+            ensureHttps(channel?.avatar) ||
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+          }
           alt={channel?.fullname}
           className="w-32 h-32 rounded-full border-4 border-white shadow-xl object-cover z-10"
           initial={{ scale: 0.8, opacity: 0 }}

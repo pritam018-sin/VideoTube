@@ -54,9 +54,8 @@ const Register = () => {
     if (formData.coverImage) data.append("coverImage", formData.coverImage);
 
     try {
-      const res = await register(data).unwrap(); 
-      dispatch(setCredentials({ ...res }));
-      toast.success("Registered successfully");
+      await register(data).unwrap();
+      toast.success("Account created successfully! Please login.");
       navigate("/login");
     } catch (err) {
       console.error("Register failed:", err);

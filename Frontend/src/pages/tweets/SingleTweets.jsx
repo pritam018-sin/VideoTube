@@ -5,6 +5,7 @@ import { format } from "timeago.js";
 import { Heart, MessageCircle, Share2, ArrowLeft } from "lucide-react";
 import TweetUtils from "../../components/TweetUtils";
 import { toast } from "react-toastify";
+import { ensureHttps } from "../../utils/url.js";
 
 const SingleTweets = () => {
   const { tweetId } = useParams();
@@ -71,7 +72,7 @@ const SingleTweets = () => {
           <div className="flex items-center gap-3">
             <Link to={`/user-channel/${tweet?.owner?.username}`}>
               <img
-                src={tweet?.owner?.avatar || "https://via.placeholder.com/150"}
+                src={ensureHttps(tweet?.owner?.avatar) || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
                 alt="avatar"
                 className="w-12 h-12 rounded-full object-cover ring-2 ring-white/10 hover:ring-red-500 transition"
               />

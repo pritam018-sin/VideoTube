@@ -54,6 +54,7 @@ router.route("/top").get(getTopVideos);
 router.route("/all-videos").get(getAllVideos);
 router.route("/:id").get(optionalJWT, getVideoById);
 router.route("/:id/like").post(verifyJWT, toggleLike("video"));
+router.route("/like/:id").post(verifyJWT, toggleLike("video"));
 
 router.route("/user-videos/:id").get(getUserVideos);
 router.route("/:userId/my-videos").get(verifyJWT, getMyVideos);
