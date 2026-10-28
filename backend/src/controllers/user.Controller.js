@@ -66,12 +66,11 @@ const registerUser = asyncHandler(async (req, res) => {
     //create User Object - create entry in db
    const user = await User.create({
         fullname,
-        avatar:  avatar?.url,
-        coverImage: coverImage?.url || "",
+        avatar:  avatar?.secure_url || avatar?.url,
+        coverImage: coverImage?.secure_url || coverImage?.url || "",
         email,
         username: username.toLowerCase(),
         password,
-        
     })
      //remove password and refresh token field from response
 
@@ -345,7 +344,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     // Update user avatar in DB
     const user = await User.findByIdAndUpdate(
         req.user?._id,
-        { $set: { avatar: avatar.url } },
+        { $set: { avatar: avatar.secure_url || avatar.url } },
         { new: true }
     ).select("-password");
 
@@ -374,7 +373,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         req.user?._id,
         { 
            $set: {
-               coverImage: coverImage.url
+               coverImage: coverImage.secure_url || coverImage.url
            }
         },
         { new: true }

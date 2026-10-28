@@ -88,7 +88,7 @@ const updateVideoThumbnail = asyncHandler(async (req, res) => {
   // Update video thumbnail in DB
   const video = await Video.findByIdAndUpdate(
     req.params.id, // video id from URL
-    { $set: { thumbnail: thumbnail.url } },
+    { $set: { thumbnail: thumbnail.secure_url || thumbnail.url } },
     { new: true }
   );
 
