@@ -22,45 +22,25 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       // call refresh endpoint (send cookie or refresh token in body)
       const refreshResult = await baseQuery(
         {
-          url: "/users/refresh-token",
+          url: "/api/v1/users/refresh-token",
           method: "POST",
-          // you can pass refreshToken in body if not using cookie:
-          // body: { refreshToken: api.getState().auth.refreshToken }
+          body:{
+            refreshToken: api.getState().auth.refreshToken
+          }
         },
         api,
         extraOptions
       );
+      const refreshedData = refreshResult?.data?.data || refreshResult?.data?.message;
+      const newAccessToken = refreshedData?.accessToken;
 
-      if (refreshResult?.data) {
-        // refresh endpoint returns { data: { accessToken, newRefreshToken } } (per your backend)
-        const newAccessToken = refreshResult.data.data?.accessToken || refreshResult.data.accessToken;
-        const newRefreshToken = refreshResult.data.data?.newRefreshToken || refreshResult.data.newRefreshToken;
-
-        if (newAccessToken) {
-          // update redux
-          api.dispatch(updateAccessToken(newAccessToken));
-        }
-        if (newRefreshToken) {
-          // update refresh token in storage if returned
-          api.dispatch(
-            // reuse setCredentials to update only tokens safely
-            // but we don't have user here; using updateAccessToken and localStorage set for refresh
-            // simpler: update localStorage directly:
-            // (not ideal, but fine)
-            () => {
-              localStorage.setItem("refreshToken", newRefreshToken);
-              return { type: "auth/refresh-token-updated" };
-            }
-          );
-        }
-
-        // retry original
+      if (newAccessToken) {
+        api.dispatch(updateAccessToken(newAccessToken));
         result = await baseQuery(args, api, extraOptions);
       } else {
-        // refresh failed -> logout frontend
         api.dispatch(logout());
       }
-    } catch (err) {
+    } catch (error) {
       api.dispatch(logout());
     }
   }

@@ -1,42 +1,15 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import Logo from "../../assets/vite.svg";
 import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { useLogoutMutation } from "../../redux/api/userApiSlice";
-import { logout as logoutAction } from "../../redux/feature/auth/authSlice";
-import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 import ProfileMenu from "../../components/ProfileMenu";
 import VideoSearchPage from "../Video/VideoSearchPage";
 
 export default function Navbar() {
   const { userInfo } = useSelector((state) => state.auth);
   const [showMenu, setShowMenu] = useState(false);
-   const [searchOpen, setSearchOpen] = useState(false); 
-
-  const [logoutApi] = useLogoutMutation();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const handleLogout = async () => {
-    try {
-      await logoutApi().unwrap();
-    } catch (err) {
-      console.warn("Logout API failed (still clearing front-end):", err);
-    } finally {
-      dispatch(logoutAction());
-      setShowMenu(false);
-      toast.success("Logged out");
-      navigate("/login");
-    }
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (!searchTerm.trim()) return;
-    navigate(`/search?query=${encodeURIComponent(searchTerm)}`);
-    setShowSearch(false); // input band kar do
-  };
+  const [searchOpen, setSearchOpen] = useState(false);
   return (
     <nav className="bg-gray-900 text-white p-4 flex justify-between items-center fixed top-0 left-0 right-0 z-50">
       <Link to="/" className="flex items-center space-x-3 ml-20">

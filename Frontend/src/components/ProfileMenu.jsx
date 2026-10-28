@@ -11,11 +11,12 @@ export default function ProfileMenu({ userInfo, onClose }) {
   const handleLogout = async () => {
     try {
       await logoutApiCall().unwrap();
-      dispatch(logout());
-      toast.success("Logout successful");
-      onClose?.();
     } catch (err) {
-      toast.error("Logout failed");
+      console.warn("Backend logout warning (clearing frontend state anyway):", err);
+    } finally {
+      dispatch(logout());
+      toast.success("Logged out successfully");
+      onClose?.();
     }
   };
 

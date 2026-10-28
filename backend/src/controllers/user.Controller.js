@@ -17,7 +17,7 @@ const generateAccessTokenAndRefreshTokens = async(userId) =>{
       await  user.save({validateBeforeSave: false});
       return { accessToken, refreshToken};
 
-    }catch{error}{
+    } catch (error) {
         throw new ApiError(500, "Something went wrong while generating refresh and access token");
     }
 }
@@ -120,7 +120,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
    const options = {
     httpOnly: true,
-    secure: true
+    secure: process.env.NODE_ENV === "production"
    }
 
    return res
@@ -133,8 +133,7 @@ const loginUser = asyncHandler(async (req, res) => {
             "User logged In Successfully",
             {
                 user: loggedInUser, accessToken, refreshToken
-            },
-            // "User logged In Successfully"
+            }
         )
    )
 
@@ -153,14 +152,14 @@ const logoutUser = asyncHandler(async (req, res) => {
         )
 
         const options = {
-        httpOnly: true,
-        secure: true
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production"
         }
 
         return res
         .status(200)
-        .clearCookie("accessToken")
-        .clearCookie("refreshToken")
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
         .json(
             new ApiResponse(
                 200,
@@ -192,9 +191,9 @@ try {
     
        const options = {
         httpOnly: true,
-        secure: true
+        secure: process.env.NODE_ENV === "production"
        }
-        const { accessToken, newRefreshToken } = await generateAccessTokenAndRefreshTokens(user._id);
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessTokenAndRefreshTokens(user._id);
     
        return res
        .status(200)
@@ -205,7 +204,7 @@ try {
                200,
                {
                    accessToken,
-                   newRefreshToken
+                   refreshToken: newRefreshToken
                },
                "Access Token Refreshed Successfully"
            )
