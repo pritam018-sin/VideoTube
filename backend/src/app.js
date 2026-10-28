@@ -43,8 +43,14 @@ app.use('/api/v1/tweets', tweetRouter);
 
 // Global Error Handler Middleware
 app.use((err, req, res, next) => {
-    const statusCode = err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    let statusCode = err.statusCode || 500;
+    let message = err.message || "Internal Server Error";
+
+    if (err.name === "MulterError" && err.code === "LIMIT_FILE_SIZE") {
+        statusCode = 413;
+        message = "File exceeds maximum allowed upload size (500MB). Please select a smaller file.";
+    }
+
     return res.status(statusCode).json({
         statusCode,
         success: false,

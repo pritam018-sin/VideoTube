@@ -20,15 +20,32 @@ const safeUnlink = (filePath) => {
     }
 };
 
+const isVideoFile = (filePath) => {
+    return /\.(mp4|mkv|mov|avi|wmv|flv|webm|m4v)$/i.test(filePath);
+};
+
 const cloudinaryUpload = async (localFilePath) => {
     try {
         if (!localFilePath) throw new Error("No file path provided");
 
-        const response = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto",
-            folder: "my-app",
-            timeout: 120000
-        });
+        const isVideo = isVideoFile(localFilePath);
+        let response;
+
+        if (isVideo) {
+            // Use upload_large with chunking for large/long videos to prevent network timeouts
+            response = await cloudinary.uploader.upload_large(localFilePath, {
+                resource_type: "video",
+                folder: "my-app",
+                chunk_size: 6000000, // 6MB chunks
+                timeout: 600000 // 10 minutes timeout for very large videos
+            });
+        } else {
+            response = await cloudinary.uploader.upload(localFilePath, {
+                resource_type: "auto",
+                folder: "my-app",
+                timeout: 120000
+            });
+        }
 
         safeUnlink(localFilePath);
         return response;
