@@ -95,15 +95,16 @@ const UploadVideo = () => {
     setUploadStage("uploading");
 
     const startTime = Date.now();
-    const uploadUrl = `${BASE_URL}${VIDEOS_URL}/upload-content`;
+    const cleanBaseUrl = (BASE_URL || "").replace(/\/$/, "");
+    const uploadUrl = `${cleanBaseUrl}${VIDEOS_URL}/upload-content`;
+    const token = accessToken || localStorage.getItem("accessToken") || userInfo?.accessToken;
 
     try {
       const response = await axios.post(uploadUrl, data, {
         signal: controller.signal,
         withCredentials: true,
         headers: {
-          "Content-Type": "multipart/form-data",
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {

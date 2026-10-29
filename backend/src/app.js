@@ -5,21 +5,17 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
-const allowedOrigins = [
-    process.env.CORS_ORIGIN,
-    "http://localhost:5173",
-    "http://localhost:3000"
-].filter(Boolean).map((o) => o.replace(/\/$/, ""));
-
-app.use(cors({
+const corsOptions = {
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
-            return callback(null, true);
-        }
-        return callback(null, true);
+        callback(null, true);
     },
-    credentials: true
-}));
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+    exposedHeaders: ["Set-Cookie"]
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({limit: '30kb'}));
 app.use(express.urlencoded({extended: true, limit: '30kb'}));
 app.use(express.static("public"));// Serve static files from the 'public' directory
@@ -46,9 +42,19 @@ app.use((err, req, res, next) => {
     let statusCode = err.statusCode || 500;
     let message = err.message || "Internal Server Error";
 
-    if (err.name === "MulterError" && err.code === "LIMIT_FILE_SIZE") {
-        statusCode = 413;
-        message = "File exceeds maximum allowed upload size (500MB). Please select a smaller file.";
+    if (err.name === "MulterError") {
+        if (err.code === "LIMIT_FILE_SIZE") {
+            statusCode = 413;
+            message = "File exceeds maximum allowed upload size (500MB). Please select a smaller file.";
+        } else {
+            statusCode = 400;
+            message = `Upload error: ${err.message}`;
+        }
+    }
+
+    if (req.headers.origin) {
+        res.setHeader("Access-Control-Allow-Origin", req.headers.origin);
+        res.setHeader("Access-Control-Allow-Credentials", "true");
     }
 
     return res.status(statusCode).json({
